@@ -1,0 +1,59 @@
+config:
+  target: "ws://localhost:4000"
+  phases:
+    - duration: 30
+      arrivalRate: 50
+      rampTo: 500
+      name: "Ramping spectator connections up to 5,000 users"
+    - duration: 60
+      arrivalRate: 500
+      name: "Sustained high spectator broadcast load"
+    - duration: 20
+      arrivalRate: 100
+      name: "Final bidding frenzy & hammer closing phase"
+  ws:
+    subprotocols:
+      - "websocket"
+  processor: "./artillery-processor.js"
+
+scenarios:
+  # Scenario A: 90% Read-Only Spectator / Projector Listeners
+  - name: "Read-Only 4K Spectator Stream"
+    weight: 90
+    engine: ws
+    flow:
+      - send:
+          event: "JOIN_AUCTION"
+          data:
+            auctionId: "tata-ipl-2026-auction"
+            clientNonce: "{{ $uuid }}"
+      - think: 5
+      - send:
+          event: "NTP_PING"
+          data:
+            clientSendTime: "{{ $timestamp }}"
+      - think: 30
+
+  # Scenario B: 10% Active High-Frequency Bidders
+  - name: "Concurrent Bidding Frenzy"
+    weight: 10
+    engine: ws
+    flow:
+      - send:
+          event: "JOIN_AUCTION"
+          data:
+            auctionId: "tata-ipl-2026-auction"
+            authToken: "verified-bidder-token-{{ $randomNumber(1, 100) }}"
+            clientNonce: "{{ $uuid }}"
+      - think: 1
+      - loop:
+          - send:
+              event: "PLACE_BID"
+              data:
+                auctionId: "tata-ipl-2026-auction"
+                lotId: "lot-cricket-101"
+                amount: "{{ $randomNumber(170000000, 220000000) }}"
+                clientNonce: "{{ $uuid }}"
+                clientTimestamp: "{{ $timestamp }}"
+          - think: 2
+        count: 5

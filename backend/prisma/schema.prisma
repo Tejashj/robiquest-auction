@@ -1,0 +1,391 @@
+// ==============================================================================
+// ENTERPRISE HIGH-CONCURRENCY REAL-TIME AUCTION PLATFORM
+// Database Architecture: PostgreSQL 16+ via Prisma ORM
+// Designed for Sub-50ms Atomic Bid Ingestion & Multi-Tenant Relational Integrity
+// ==============================================================================
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins", "metrics"]
+}
+
+// ------------------------------------------------------------------------------
+// ENUMS
+// ------------------------------------------------------------------------------
+
+enum UserRole {
+  SUPERADMIN
+  AUCTIONEER
+  VERIFIED_BIDDER
+  SPECTATOR
+}
+
+enum KycStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum AuctionMode {
+  ENGLISH_FORWARD       // Standard ascending live bidding with anti-sniping soft close
+  TIMED_BATCH           // Staggered lot closing timed auction
+  DUTCH                 // Descending price until first bidder claims
+  SEALED_BID_VICKREY    // Second-price blind reserve auction
+}
+
+enum AuctionStatus {
+  DRAFT
+  SCHEDULED
+  PRE_BIDDING
+  LIVE
+  PAUSED
+  SOFT_CLOSING
+  COMPLETED
+  CANCELLED
+}
+
+enum LotStatus {
+  DRAFT
+  UPCOMING
+  LIVE
+  PAUSED
+  FAIR_WARNING
+  SOLD
+  UNSOLD_PASSED
+  RETRACTED
+}
+
+enum BidStatus {
+  ACCEPTED
+  OUTBID
+  REJECTED
+  RETRACTED
+}
+
+enum EscrowStatus {
+  PENDING_AUTHORIZATION
+  AUTHORIZED_HELD
+  CAPTURED_PARTIAL
+  CAPTURED_FULL
+  RELEASED
+  FAILED
+}
+
+enum BatchIngestionStatus {
+  PARSING
+  PREVIEW_READY
+  COMMITTED
+  ROLLED_BACK
+  FAILED
+}
+
+// ------------------------------------------------------------------------------
+// 1. IDENTITY & ACCESS CONTROL (RBAC)
+// ------------------------------------------------------------------------------
+
+model User {
+  id              String         @id @default(uuid()) @db.Uuid
+  email           String         @unique @db.VarChar(255)
+  passwordHash    String         @db.VarChar(255)
+  firstName       String         @db.VarChar(100)
+  lastName        String         @db.VarChar(100)
+  role            UserRole       @default(SPECTATOR)
+  kycStatus       KycStatus      @default(UNVERIFIED)
+  paddleNumber    Int?           @unique // Unique live auction bidder paddle id
+  phone           String?        @db.VarChar(30)
+  avatarUrl       String?        @db.VarChar(512)
+  billingAddress  Json?          @db.JsonB
+  
+  // Relations
+  bids            Bid[]          @relation("UserBids")
+  highBidLots     Lot[]          @relation("HighBidderLots")
+  wonLots         Lot[]          @relation("WonBidderLots")
+  proxyBids       ProxyBid[]     @relation("UserProxyBids")
+  escrowHolds     EscrowHold[]   @relation("UserEscrowHolds")
+  auctionsCreated Auction[]      @relation("AuctioneerAuctions")
+  ingestionBatches ExcelIngestionBatch[] @relation("UserBatches")
+  auditActions    ItemAuditLog[] @relation("ActorAuditLogs")
+
+  createdAt       DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt       DateTime       @updatedAt @db.Timestamptz(6)
+
+  @@index([email])
+  @@index([role, kycStatus])
+  @@map("users")
+}
+
+// ------------------------------------------------------------------------------
+// 2. AUCTIONS (TENANT / EVENT ENGINE)
+// ------------------------------------------------------------------------------
+
+model Auction {
+  id                         String         @id @default(uuid()) @db.Uuid
+  title                      String         @db.VarChar(255)
+  slug                       String         @unique @db.VarChar(255)
+  description                String?        @db.Text
+  mode                       AuctionMode    @default(ENGLISH_FORWARD)
+  status                     AuctionStatus  @default(DRAFT)
+  currency                   String         @default("USD") @db.VarChar(3)
+
+  // Scheduling & Dynamic Time Extension (Anti-Sniping)
+  scheduledStartTime         DateTime       @db.Timestamptz(6)
+  scheduledEndTime           DateTime       @db.Timestamptz(6)
+  actualStartTime            DateTime?      @db.Timestamptz(6)
+  actualEndTime              DateTime?      @db.Timestamptz(6)
+  antiSnipingWindowSeconds   Int            @default(60)   // Trigger window (e.g., final 60s)
+  antiSnipingExtensionSeconds Int           @default(120)  // Clock extension (e.g., +2 minutes)
+  softCloseMaxExtensions     Int            @default(10)   // Safety circuit breaker
+
+  // Dutch Auction Specific Parameters
+  dutchStartPrice            Decimal?       @db.Decimal(14, 2)
+  dutchFloorPrice            Decimal?       @db.Decimal(14, 2)
+  dutchDecrementAmount       Decimal?       @db.Decimal(14, 2)
+  dutchIntervalSeconds       Int?           @default(30)
+
+  // Financial Escrow Requirements
+  requireEscrowDeposit       Boolean        @default(true)
+  escrowDepositAmount        Decimal        @default(1000.00) @db.Decimal(14, 2)
+
+  // Aggregated Analytics Cache
+  totalLotsCount             Int            @default(0)
+  totalGmv                   Decimal        @default(0.00) @db.Decimal(14, 2)
+  totalBidsCount             Int            @default(0)
+
+  // Ownership & Auditing
+  createdById                String         @db.Uuid
+  createdBy                  User           @relation("AuctioneerAuctions", fields: [createdById], references: [id])
+
+  // Relations
+  lots                       Lot[]          @relation("AuctionLots")
+  escrowHolds                EscrowHold[]   @relation("AuctionEscrowHolds")
+  ingestionBatches           ExcelIngestionBatch[] @relation("AuctionBatches")
+  auditLogs                  ItemAuditLog[] @relation("AuctionAuditLogs")
+
+  createdAt                  DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt                  DateTime       @updatedAt @db.Timestamptz(6)
+
+  @@index([status, scheduledStartTime])
+  @@index([mode])
+  @@map("auctions")
+}
+
+// ------------------------------------------------------------------------------
+// 3. LOTS / CATALOG ITEMS
+// ------------------------------------------------------------------------------
+
+model Lot {
+  id                         String         @id @default(uuid()) @db.Uuid
+  auctionId                  String         @db.Uuid
+  auction                    Auction        @relation("AuctionLots", fields: [auctionId], references: [id], onDelete: Cascade)
+  lotNumber                  Int            // Human-readable sequential lot number (1, 2, 3...)
+  title                      String         @db.VarChar(255)
+  category                   String         @db.VarChar(100)
+  description                String?        @db.Text
+  sellerName                 String?        @db.VarChar(150)
+  
+  // Pricing Strategy (High Precision Decimal)
+  startingBid                Decimal        @db.Decimal(14, 2)
+  reservePrice               Decimal?       @db.Decimal(14, 2) // Optional hidden seller reserve
+  minIncrement               Decimal        @default(50.00) @db.Decimal(14, 2)
+  estimatedLow               Decimal?       @db.Decimal(14, 2)
+  estimatedHigh              Decimal?       @db.Decimal(14, 2)
+  
+  // Live State (Hot-path synced from Redis)
+  currentHighBid             Decimal?       @db.Decimal(14, 2)
+  currentHighBidderId        String?        @db.Uuid
+  currentHighBidder          User?          @relation("HighBidderLots", fields: [currentHighBidderId], references: [id])
+  hammerPrice                Decimal?       @db.Decimal(14, 2)
+  winningBidderId            String?        @db.Uuid
+  winningBidder              User?          @relation("WonBidderLots", fields: [winningBidderId], references: [id])
+
+  status                     LotStatus      @default(DRAFT)
+  closingTime                DateTime       @db.Timestamptz(6)
+  softCloseExtendedCount     Int            @default(0)
+
+  // Media & Custom Attributes
+  imageUrls                  String[]       @default([])
+  attributes                 Json?          @default("{}") @db.JsonB // Year, Provenance, Condition, Dimensions
+
+  // Relations
+  bids                       Bid[]          @relation("LotBids")
+  proxyBids                  ProxyBid[]     @relation("LotProxyBids")
+  auditLogs                  ItemAuditLog[] @relation("LotAuditLogs")
+  bidAuditLogs               BidAuditLog[]  @relation("LotBidAuditLogs")
+
+  createdAt                  DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt                  DateTime       @updatedAt @db.Timestamptz(6)
+
+  @@unique([auctionId, lotNumber])
+  @@index([auctionId, status, closingTime])
+  @@index([currentHighBidderId])
+  @@map("lots")
+}
+
+// ------------------------------------------------------------------------------
+// 4. BIDS (IMMUTABLE TIME-SERIES TRANSACTIONS)
+// ------------------------------------------------------------------------------
+
+model Bid {
+  id                         String         @id @default(uuid()) @db.Uuid
+  lotId                      String         @db.Uuid
+  lot                        Lot            @relation("LotBids", fields: [lotId], references: [id], onDelete: Cascade)
+  bidderId                   String         @db.Uuid
+  bidder                     User           @relation("UserBids", fields: [bidderId], references: [id])
+
+  amount                     Decimal        @db.Decimal(14, 2)
+  isProxyBid                 Boolean        @default(false)
+  status                     BidStatus      @default(ACCEPTED)
+  rejectionReason            String?        @db.VarChar(100)
+
+  // Concurrency & Idempotency Metadata
+  clientNonce                String?        @db.VarChar(64) // Client generated UUID to stop double-click
+  ipAddress                  String?        @db.VarChar(45)
+  userAgent                  String?        @db.VarChar(255)
+  auditHash                  String         @db.VarChar(128) // SHA-256 (prevHash + lotId + bidderId + amount + timestamp)
+  sequenceNumber             BigInt         // Monotonically increasing sequence number per lot
+
+  // Sub-millisecond precise timestamp
+  createdAt                  DateTime       @default(now()) @db.Timestamptz(6)
+
+  // Relations
+  auditLog                   BidAuditLog?   @relation("BidAuditRef")
+
+  @@unique([lotId, sequenceNumber])
+  @@index([lotId, createdAt(sort: Desc)])
+  @@index([bidderId, createdAt(sort: Desc)])
+  @@index([lotId, status, amount(sort: Desc)])
+  @@map("bids")
+}
+
+// ------------------------------------------------------------------------------
+// 5. MAX PROXY BIDDING ENGINE
+// ------------------------------------------------------------------------------
+
+model ProxyBid {
+  id                         String         @id @default(uuid()) @db.Uuid
+  lotId                      String         @db.Uuid
+  lot                        Lot            @relation("LotProxyBids", fields: [lotId], references: [id], onDelete: Cascade)
+  bidderId                   String         @db.Uuid
+  bidder                     User           @relation("UserProxyBids", fields: [bidderId], references: [id])
+
+  maxCeiling                 Decimal        @db.Decimal(14, 2)
+  currentAllocatedBid        Decimal        @db.Decimal(14, 2)
+  isActive                   Boolean        @default(true)
+
+  createdAt                  DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt                  DateTime       @updatedAt @db.Timestamptz(6)
+
+  @@unique([lotId, bidderId])
+  @@index([lotId, isActive, maxCeiling(sort: Desc)])
+  @@map("proxy_bids")
+}
+
+// ------------------------------------------------------------------------------
+// 6. FINANCIAL ESCROW & STRIPE PRE-AUTHORIZATION
+// ------------------------------------------------------------------------------
+
+model EscrowHold {
+  id                         String         @id @default(uuid()) @db.Uuid
+  userId                     String         @db.Uuid
+  user                       User           @relation("UserEscrowHolds", fields: [userId], references: [id])
+  auctionId                  String         @db.Uuid
+  auction                    Auction        @relation("AuctionEscrowHolds", fields: [auctionId], references: [id])
+
+  stripePaymentIntentId      String         @unique @db.VarChar(100)
+  stripeCustomerId           String?        @db.VarChar(100)
+  holdAmount                 Decimal        @db.Decimal(14, 2)
+  currency                   String         @default("USD") @db.VarChar(3)
+  status                     EscrowStatus   @default(PENDING_AUTHORIZATION)
+  failureReason              String?        @db.Text
+
+  createdAt                  DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt                  DateTime       @updatedAt @db.Timestamptz(6)
+
+  @@index([userId, auctionId, status])
+  @@map("escrow_holds")
+}
+
+// ------------------------------------------------------------------------------
+// 7. EXCEL STREAMING INGESTION & ROLLBACK ENGINE
+// ------------------------------------------------------------------------------
+
+model ExcelIngestionBatch {
+  id                         String               @id @default(uuid()) @db.Uuid
+  auctionId                  String               @db.Uuid
+  auction                    Auction              @relation("AuctionBatches", fields: [auctionId], references: [id], onDelete: Cascade)
+  uploadedById               String               @db.Uuid
+  uploadedBy                 User                 @relation("UserBatches", fields: [uploadedById], references: [id])
+
+  fileName                   String               @db.VarChar(255)
+  fileSizeBytes              BigInt
+  totalRows                  Int                  @default(0)
+  validRows                  Int                  @default(0)
+  errorRows                  Int                  @default(0)
+  status                     BatchIngestionStatus @default(PARSING)
+
+  columnMapping              Json                 @db.JsonB // { "Lot": "lotNumber", "Title": "title" }
+  validationErrors           Json?                @db.JsonB // Array of { row, column, error }
+  rollbackSnapshot           Json?                @db.JsonB // Snapshot of created lot IDs for clean single-click rollback
+
+  createdAt                  DateTime             @default(now()) @db.Timestamptz(6)
+  updatedAt                  DateTime             @updatedAt @db.Timestamptz(6)
+
+  @@index([auctionId, status])
+  @@map("excel_ingestion_batches")
+}
+
+// ------------------------------------------------------------------------------
+// 8. ZERO-TRUST AUDIT LOGS (ADMIN & HAMMER ACTIONS)
+// ------------------------------------------------------------------------------
+
+model ItemAuditLog {
+  id                         String         @id @default(uuid()) @db.Uuid
+  auctionId                  String         @db.Uuid
+  auction                    Auction        @relation("AuctionAuditLogs", fields: [auctionId], references: [id], onDelete: Cascade)
+  lotId                      String?        @db.Uuid
+  lot                        Lot?           @relation("LotAuditLogs", fields: [lotId], references: [id], onDelete: SetNull)
+  actorId                    String         @db.Uuid
+  actor                      User           @relation("ActorAuditLogs", fields: [actorId], references: [id])
+
+  action                     String         @db.VarChar(100) // "HAMMER_SOLD", "RESERVE_DROPPED", "PAUSED", "EXTENDED"
+  details                    String?        @db.Text
+  previousState              Json?          @db.JsonB
+  newState                   Json?          @db.JsonB
+  ipAddress                  String?        @db.VarChar(45)
+
+  createdAt                  DateTime       @default(now()) @db.Timestamptz(6)
+
+  @@index([auctionId, createdAt(sort: Desc)])
+  @@index([lotId, createdAt(sort: Desc)])
+  @@map("item_audit_logs")
+}
+
+// ------------------------------------------------------------------------------
+// 9. HIGH-PRECISION BID TELEMETRY & CONCURRENCY AUDIT
+// ------------------------------------------------------------------------------
+
+model BidAuditLog {
+  id                         String         @id @default(uuid()) @db.Uuid
+  lotId                      String         @db.Uuid
+  lot                        Lot            @relation("LotBidAuditLogs", fields: [lotId], references: [id], onDelete: Cascade)
+  bidId                      String         @unique @db.Uuid
+  bid                        Bid            @relation("BidAuditRef", fields: [bidId], references: [id], onDelete: Cascade)
+
+  lockAcquisitionDurationUs  Int            // Microseconds spent acquiring Redis distributed lock
+  atomicExecutionDurationUs  Int            // Microseconds executing atomic Lua bid evaluation
+  previousHighBid            Decimal?       @db.Decimal(14, 2)
+  previousHighBidderId       String?        @db.Uuid
+  serverNodeId               String         @db.VarChar(50)
+  signatureHash              String         @db.VarChar(128)
+
+  createdAt                  DateTime       @default(now()) @db.Timestamptz(6)
+
+  @@index([lotId, createdAt(sort: Desc)])
+  @@map("bid_audit_logs")
+}
