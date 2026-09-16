@@ -243,23 +243,23 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-3xl bg-[#060a17] border border-cyan-500/40 shadow-2xl shadow-cyan-500/25 overflow-hidden text-slate-100">
+      <div className="relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-[18px] bg-black border border-[#16A085]/40 shadow-2xl shadow-[#16A085]/20 overflow-hidden text-white">
         {/* Top Header */}
-        <div className="px-6 py-4 bg-[#090f24] border-b border-white/10 flex items-center justify-between flex-shrink-0">
+        <div className="px-6 py-4 bg-black border-b border-white/10 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-black border border-cyan-400 p-1 shadow-lg shadow-cyan-500/30 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-[18px] bg-black border-2 border-[#16A085] p-1 shadow-lg shadow-[#16A085]/30 flex items-center justify-center">
               <img src="/robocell-crest.png" alt="RoboCell" className="w-full h-full object-contain" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-widest">
+                <span className="text-xs font-mono font-bold text-[#16A085] uppercase tracking-widest">
                   ROBICELL CMS STUDIO
                 </span>
-                <span className="px-2 py-0.2 rounded text-[10px] font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                <span className="px-2 py-0.2 rounded-[18px] text-[10px] font-mono bg-[#16A085]/20 text-[#16A085] border border-[#16A085]/40">
                   {lots.length} Contenders Loaded
                 </span>
               </div>
-              <h2 className="text-lg font-black text-white uppercase tracking-tight">
+              <h2 className="text-lg font-black text-[#D8CFB4] uppercase tracking-tight font-poppins">
                 Contender & Roster Studio
               </h2>
             </div>
@@ -268,14 +268,14 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={handleStartAdd}
-              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-extrabold text-xs flex items-center gap-1.5 shadow-md shadow-cyan-500/30 transition-all"
+              className="px-4 py-2 rounded-[18px] bg-[#16A085] hover:bg-[#1abc9c] text-black font-extrabold text-xs flex items-center gap-1.5 shadow-md shadow-[#16A085]/30 transition-all"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add Contender</span>
             </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 hover:text-white transition-all"
+              className="p-2 rounded-[18px] bg-white/[0.03] hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition-all"
             >
               <X className="w-4 h-4" />
             </button>
@@ -283,13 +283,13 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
         </div>
 
         {/* Sub-Navigation Tabs */}
-        <div className="flex items-center gap-2 px-6 pt-3 pb-2 bg-black/40 border-b border-white/10 text-xs font-mono">
+        <div className="flex items-center gap-2 px-6 pt-3 pb-2 bg-black border-b border-white/10 text-xs font-mono">
           <button
             onClick={() => setActiveTab('LIST')}
-            className={`px-3 py-1.5 rounded-xl transition-all ${
+            className={`px-3.5 py-1.5 rounded-[18px] transition-all ${
               activeTab === 'LIST'
-                ? 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-bold'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-[#16A085] text-black font-bold'
+                : 'text-gray-400 hover:text-[#D8CFB4]'
             }`}
           >
             Catalog List ({lots.length})
@@ -298,20 +298,20 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
             onClick={() => {
               if (activeTab !== 'ADD_EDIT') handleStartAdd();
             }}
-            className={`px-3 py-1.5 rounded-xl transition-all ${
+            className={`px-3.5 py-1.5 rounded-[18px] transition-all ${
               activeTab === 'ADD_EDIT'
-                ? 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-bold'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-[#16A085] text-black font-bold'
+                : 'text-gray-400 hover:text-[#D8CFB4]'
             }`}
           >
             {editingLotId ? 'Edit Contender' : 'New Contender Form'}
           </button>
           <button
             onClick={() => setActiveTab('IMPORT_EXPORT')}
-            className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
+            className={`px-3.5 py-1.5 rounded-[18px] transition-all flex items-center gap-1.5 ${
               activeTab === 'IMPORT_EXPORT'
-                ? 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-bold'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-[#16A085] text-black font-bold'
+                : 'text-gray-400 hover:text-[#D8CFB4]'
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
@@ -322,16 +322,16 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
         {/* Feedback Message */}
         {statusFeedback && (
           <div
-            className={`mx-6 mt-3 p-3 rounded-2xl border text-xs flex items-center gap-2 ${
+            className={`mx-6 mt-3 p-3.5 rounded-[18px] text-xs font-bold flex items-center gap-2 shadow-xl ${
               statusFeedback.type === 'SUCCESS'
-                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-200'
-                : 'bg-red-500/20 border-red-500/40 text-red-200'
+                ? 'bg-[#16A085] text-black'
+                : 'bg-red-500 text-white'
             }`}
           >
             {statusFeedback.type === 'SUCCESS' ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-black flex-shrink-0" />
             ) : (
-              <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
+              <AlertTriangle className="w-4 h-4 text-white flex-shrink-0" />
             )}
             <span>{statusFeedback.text}</span>
           </div>
@@ -343,10 +343,10 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
           {activeTab === 'LIST' && (
             <div className="space-y-3">
               {lots.length === 0 ? (
-                <div className="text-center py-16 text-slate-500">
-                  <Sparkles className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm font-semibold">No contenders in the catalog yet.</p>
-                  <p className="text-xs text-slate-600 mt-1">Click "+ Add Contender" to create your first auction lot.</p>
+                <div className="text-center py-16 text-gray-500">
+                  <Sparkles className="w-12 h-12 mx-auto mb-3 opacity-30 text-[#16A085]" />
+                  <p className="text-sm font-semibold text-white">No contenders in the catalog yet.</p>
+                  <p className="text-xs text-gray-400 mt-1">Click "+ Add Contender" to create your first auction lot.</p>
                 </div>
               ) : (
                 lots.map((lot) => {
@@ -356,53 +356,53 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
                   return (
                     <div
                       key={lot.id}
-                      className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                      className={`p-4 rounded-[18px] border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                         isActive
-                          ? 'bg-cyan-950/30 border-cyan-400/50 shadow-lg shadow-cyan-500/10 ring-1 ring-cyan-400/30'
-                          : 'bg-black/30 border-white/10 hover:border-white/20'
+                          ? 'bg-[#16A085]/10 border-[#16A085] shadow-lg shadow-[#16A085]/10 ring-1 ring-[#16A085]/40'
+                          : 'bg-white/[0.02] border-white/10 hover:border-white/20'
                       }`}
                     >
                       {/* Left: Thumbnail & Info */}
                       <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-black/60 border border-white/15 flex-shrink-0 relative">
+                        <div className="w-16 h-16 rounded-[18px] overflow-hidden bg-black border border-white/15 flex-shrink-0 relative">
                           <img
                             src={lot.imageUrls[0] || PRESET_AVATARS[0].url}
                             alt={lot.title}
                             className="w-full h-full object-cover"
                           />
-                          <span className="absolute top-1 left-1 px-1.5 py-0.2 rounded bg-black/80 font-mono text-[9px] font-bold text-amber-300">
+                          <span className="absolute top-1 left-1 px-1.5 py-0.2 rounded-[18px] bg-black/80 font-mono text-[9px] font-bold text-[#D8CFB4]">
                             #{lot.lotNumber}
                           </span>
                         </div>
 
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-mono font-bold text-cyan-400 uppercase">
+                            <span className="text-xs font-mono font-bold text-[#16A085] uppercase">
                               {lot.category}
                             </span>
                             {lot.roleBadge && (
-                              <span className="px-2 py-0.2 rounded text-[10px] font-mono bg-white/10 text-slate-300">
+                              <span className="px-2 py-0.2 rounded-[18px] text-[10px] font-mono bg-white/[0.03] text-gray-300 border border-white/10">
                                 {lot.roleBadge}
                               </span>
                             )}
                             {isActive && (
-                              <span className="px-2 py-0.2 rounded text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 animate-pulse">
+                              <span className="px-2 py-0.2 rounded-[18px] text-[10px] font-mono font-bold bg-[#16A085]/20 text-[#16A085] border border-[#16A085]/40 animate-pulse">
                                 ON STAGE NOW
                               </span>
                             )}
                           </div>
 
-                          <h3 className="text-base font-black text-white uppercase tracking-tight mt-0.5">
+                          <h3 className="text-base font-black text-[#D8CFB4] uppercase tracking-tight mt-0.5 font-poppins">
                             {lot.title}
                           </h3>
 
                           {/* Sports Stats Mini Badges */}
                           {stats && (
                             <div className="flex flex-wrap items-center gap-2 mt-1 text-[10px] font-mono">
-                              <span className="text-amber-400">⚡ PWR: {stats.power}</span>
-                              <span className="text-cyan-400">🚀 VEL: {stats.velocity}</span>
-                              <span className="text-rose-400">🛡️ ARM: {stats.armor}</span>
-                              <span className="text-purple-400">🧠 AI: {stats.aiCompute}</span>
+                              <span className="text-[#16A085]">⚡ PWR: {stats.power}</span>
+                              <span className="text-[#16A085]">🚀 VEL: {stats.velocity}</span>
+                              <span className="text-[#D8CFB4]">🛡️ ARM: {stats.armor}</span>
+                              <span className="text-[#16A085]">🧠 AI: {stats.aiCompute}</span>
                             </div>
                           )}
                         </div>
@@ -411,7 +411,7 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
                       {/* Right: Pricing & Actions */}
                       <div className="flex items-center justify-between sm:justify-end gap-3 pt-3 sm:pt-0 border-t sm:border-t-0 border-white/10">
                         <div className="text-left sm:text-right">
-                          <div className="text-[10px] font-mono text-slate-400 uppercase">Base Price</div>
+                          <div className="text-[10px] font-mono text-gray-400 uppercase">Base Price</div>
                           <div className="text-base font-black font-mono text-white">
                             {formatAuctionCurrency(lot.startingBid, profile.currency)}
                           </div>
@@ -421,7 +421,7 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
                           {!isActive && (
                             <button
                               onClick={() => setActiveLot(lot.id)}
-                              className="px-2.5 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-bold transition-all flex items-center gap-1"
+                              className="px-3 py-1.5 rounded-[18px] bg-[#16A085]/20 hover:bg-[#16A085]/30 border border-[#16A085]/40 text-[#16A085] text-xs font-bold transition-all flex items-center gap-1"
                               title="Put directly on auction stage"
                             >
                               <Play className="w-3 h-3" />
@@ -431,7 +431,7 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
 
                           <button
                             onClick={() => handleStartEdit(lot)}
-                            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all"
+                            className="p-2 rounded-[18px] bg-white/[0.03] hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white transition-all"
                             title="Edit Contender"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
@@ -439,7 +439,7 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
 
                           <button
                             onClick={() => handleDeleteContender(lot.id, lot.title)}
-                            className="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 transition-all"
+                            className="p-2 rounded-[18px] bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 transition-all"
                             title="Delete Contender"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -458,7 +458,7 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
             <form onSubmit={handleSaveContender} className="space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-mono font-bold text-[#D8CFB4] uppercase tracking-wider mb-1.5">
                     Contender Name / Title *
                   </label>
                   <input
@@ -466,13 +466,13 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     placeholder="e.g. TITAN VORTEX (Heavyweight Combat Bot)"
-                    className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white font-sans text-sm focus:outline-none focus:border-cyan-400"
+                    className="w-full px-4 py-2.5 rounded-[18px] bg-white/[0.03] border-none text-white font-sans text-sm focus:outline-none focus:ring-1 focus:ring-[#16A085]"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-mono font-bold text-[#D8CFB4] uppercase tracking-wider mb-1.5">
                     Category / Discipline
                   </label>
                   <input
@@ -480,12 +480,12 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     placeholder="e.g. Heavyweight Armor & Kinetic Flipper"
-                    className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white font-sans text-sm focus:outline-none focus:border-cyan-400"
+                    className="w-full px-4 py-2.5 rounded-[18px] bg-white/[0.03] border-none text-white font-sans text-sm focus:outline-none focus:ring-1 focus:ring-[#16A085]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-mono font-bold text-[#D8CFB4] uppercase tracking-wider mb-1.5">
                     Role Badge / Combat Class
                   </label>
                   <input
@@ -493,33 +493,33 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
                     value={formData.roleBadge}
                     onChange={(e) => setFormData({ ...formData, roleBadge: e.target.value })}
                     placeholder="e.g. GRADE S+ TITAN"
-                    className="w-full px-4 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white font-sans text-sm focus:outline-none focus:border-cyan-400"
+                    className="w-full px-4 py-2.5 rounded-[18px] bg-white/[0.03] border-none text-white font-sans text-sm focus:outline-none focus:ring-1 focus:ring-[#16A085]"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-mono font-bold text-[#D8CFB4] uppercase tracking-wider mb-1.5">
                       Base Price ({profile.currency})
                     </label>
                     <input
                       type="number"
                       value={formData.startingBid}
                       onChange={(e) => setFormData({ ...formData, startingBid: Number(e.target.value) })}
-                      className="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white font-mono text-sm focus:outline-none focus:border-cyan-400"
+                      className="w-full px-3 py-2.5 rounded-[18px] bg-white/[0.03] border-none text-white font-mono text-sm focus:outline-none focus:ring-1 focus:ring-[#16A085]"
                       min={1000}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-mono font-bold text-[#D8CFB4] uppercase tracking-wider mb-1.5">
                       Min Increment
                     </label>
                     <input
                       type="number"
                       value={formData.minIncrement}
                       onChange={(e) => setFormData({ ...formData, minIncrement: Number(e.target.value) })}
-                      className="w-full px-3 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white font-mono text-sm focus:outline-none focus:border-cyan-400"
+                      className="w-full px-3 py-2.5 rounded-[18px] bg-white/[0.03] border-none text-white font-mono text-sm focus:outline-none focus:ring-1 focus:ring-[#16A085]"
                       min={500}
                     />
                   </div>
@@ -528,7 +528,7 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
 
               {/* Photo & Quick Thumbnail Selector */}
               <div>
-                <label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-mono font-bold text-[#D8CFB4] uppercase tracking-wider mb-1.5">
                   Contender Image URL (or select preset below)
                 </label>
                 <div className="flex gap-2">
@@ -537,28 +537,28 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
                     value={formData.imageUrl}
                     onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                     placeholder="https://..."
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-black/60 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
+                    className="flex-1 px-4 py-2.5 rounded-[18px] bg-white/[0.03] border-none text-white font-mono text-xs focus:outline-none focus:ring-1 focus:ring-[#16A085]"
                   />
-                  <div className="w-10 h-10 rounded-xl overflow-hidden bg-black/50 border border-white/20 flex-shrink-0">
+                  <div className="w-10 h-10 rounded-[18px] overflow-hidden bg-black border border-white/20 flex-shrink-0">
                     <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
                   </div>
                 </div>
 
                 {/* Instant Avatar Selector Chips */}
                 <div className="flex flex-wrap items-center gap-2 mt-2">
-                  <span className="text-[10px] text-slate-400 font-mono">Presets:</span>
+                  <span className="text-[10px] text-gray-400 font-mono">Presets:</span>
                   {PRESET_AVATARS.map((avatar, idx) => (
                     <button
                       key={idx}
                       type="button"
                       onClick={() => setFormData({ ...formData, imageUrl: avatar.url })}
-                      className={`px-2 py-1 rounded-lg text-[10px] font-mono border transition-all flex items-center gap-1.5 ${
+                      className={`px-2.5 py-1 rounded-[18px] text-[10px] font-mono border transition-all flex items-center gap-1.5 ${
                         formData.imageUrl === avatar.url
-                          ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300'
-                          : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
+                          ? 'bg-[#16A085]/20 border-[#16A085] text-[#16A085] font-bold'
+                          : 'bg-white/[0.03] border-white/10 text-gray-400 hover:text-white'
                       }`}
                     >
-                      <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                      <span className="w-2 h-2 rounded-full bg-[#16A085]" />
                       <span>{avatar.label}</span>
                     </button>
                   ))}
@@ -566,9 +566,9 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
               </div>
 
               {/* Sports & Combat Attributes Sliders */}
-              <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-4">
+              <div className="p-4 rounded-[18px] bg-white/[0.02] border border-white/10 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#16A085] flex items-center gap-1.5">
                     <Activity className="w-3.5 h-3.5" />
                     Sports & Combat Performance Ratings (0 - 100)
                   </span>
@@ -576,9 +576,9 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <div className="flex justify-between text-xs font-mono text-slate-300 mb-1">
+                    <div className="flex justify-between text-xs font-mono text-gray-300 mb-1">
                       <span>⚡ Power / Torque:</span>
-                      <strong className="text-amber-400">{formData.power}/100</strong>
+                      <strong className="text-[#16A085]">{formData.power}/100</strong>
                     </div>
                     <input
                       type="range"
@@ -586,14 +586,14 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
                       max="100"
                       value={formData.power}
                       onChange={(e) => setFormData({ ...formData, power: Number(e.target.value) })}
-                      className="w-full accent-amber-400 cursor-pointer"
+                      className="w-full accent-[#16A085] cursor-pointer"
                     />
                   </div>
 
                   <div>
-                    <div className="flex justify-between text-xs font-mono text-slate-300 mb-1">
+                    <div className="flex justify-between text-xs font-mono text-gray-300 mb-1">
                       <span>🚀 Velocity / Agility:</span>
-                      <strong className="text-cyan-400">{formData.velocity}/100</strong>
+                      <strong className="text-[#16A085]">{formData.velocity}/100</strong>
                     </div>
                     <input
                       type="range"
@@ -601,14 +601,14 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
                       max="100"
                       value={formData.velocity}
                       onChange={(e) => setFormData({ ...formData, velocity: Number(e.target.value) })}
-                      className="w-full accent-cyan-400 cursor-pointer"
+                      className="w-full accent-[#16A085] cursor-pointer"
                     />
                   </div>
 
                   <div>
-                    <div className="flex justify-between text-xs font-mono text-slate-300 mb-1">
+                    <div className="flex justify-between text-xs font-mono text-gray-300 mb-1">
                       <span>🛡️ Armor / Durability:</span>
-                      <strong className="text-rose-400">{formData.armor}/100</strong>
+                      <strong className="text-[#D8CFB4]">{formData.armor}/100</strong>
                     </div>
                     <input
                       type="range"
@@ -616,14 +616,14 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
                       max="100"
                       value={formData.armor}
                       onChange={(e) => setFormData({ ...formData, armor: Number(e.target.value) })}
-                      className="w-full accent-rose-400 cursor-pointer"
+                      className="w-full accent-[#D8CFB4] cursor-pointer"
                     />
                   </div>
 
                   <div>
-                    <div className="flex justify-between text-xs font-mono text-slate-300 mb-1">
+                    <div className="flex justify-between text-xs font-mono text-gray-300 mb-1">
                       <span>🧠 AI / SLAM Compute:</span>
-                      <strong className="text-purple-400">{formData.aiCompute}/100</strong>
+                      <strong className="text-[#16A085]">{formData.aiCompute}/100</strong>
                     </div>
                     <input
                       type="range"
@@ -631,14 +631,14 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
                       max="100"
                       value={formData.aiCompute}
                       onChange={(e) => setFormData({ ...formData, aiCompute: Number(e.target.value) })}
-                      className="w-full accent-purple-400 cursor-pointer"
+                      className="w-full accent-[#16A085] cursor-pointer"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 pt-2">
                   <div>
-                    <label className="block text-[11px] font-mono text-slate-400 uppercase mb-1">
+                    <label className="block text-[11px] font-mono text-gray-400 uppercase mb-1">
                       Signature Weapon / Feature
                     </label>
                     <input
@@ -646,12 +646,12 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
                       value={formData.specialty}
                       onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
                       placeholder="e.g. 12,000 RPM Hardox Disc"
-                      className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/15 text-white text-xs font-sans"
+                      className="w-full px-3 py-2 rounded-[18px] bg-white/[0.03] border-none text-white text-xs font-sans focus:outline-none focus:ring-1 focus:ring-[#16A085]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-mono text-slate-400 uppercase mb-1">
+                    <label className="block text-[11px] font-mono text-gray-400 uppercase mb-1">
                       Win Rate / Combat Record
                     </label>
                     <input
@@ -659,7 +659,7 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
                       value={formData.winRate}
                       onChange={(e) => setFormData({ ...formData, winRate: e.target.value })}
                       placeholder="e.g. 92% (14 Wins - 1 Loss)"
-                      className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/15 text-white text-xs font-sans"
+                      className="w-full px-3 py-2 rounded-[18px] bg-white/[0.03] border-none text-white text-xs font-sans focus:outline-none focus:ring-1 focus:ring-[#16A085]"
                     />
                   </div>
                 </div>
@@ -670,13 +670,13 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveTab('LIST')}
-                  className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300"
+                  className="px-4 py-2.5 rounded-[18px] bg-white/[0.03] hover:bg-white/10 border border-white/10 text-xs font-bold text-gray-300"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-black uppercase text-xs tracking-wider shadow-lg shadow-cyan-500/30 transition-all active:scale-[0.98]"
+                  className="px-6 py-2.5 rounded-[18px] bg-[#16A085] hover:bg-[#1abc9c] text-black font-black uppercase text-xs tracking-wider shadow-lg shadow-[#16A085]/30 transition-all active:scale-[0.98]"
                 >
                   {editingLotId ? 'Save Changes' : 'Create & Add Contender'}
                 </button>
@@ -687,26 +687,26 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
           {/* VIEW 3: JSON IMPORT / EXPORT */}
           {activeTab === 'IMPORT_EXPORT' && (
             <div className="space-y-6">
-              <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-3">
+              <div className="p-4 rounded-[18px] bg-white/[0.02] border border-white/10 space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-sm font-bold text-white uppercase">Export Tournament State</h4>
-                    <p className="text-xs text-slate-400">Download the complete list of contenders, team budgets, and configuration as JSON.</p>
+                    <h4 className="text-sm font-bold text-white uppercase font-poppins">Export Tournament State</h4>
+                    <p className="text-xs text-gray-400">Download the complete list of contenders, team budgets, and configuration as JSON.</p>
                   </div>
                   <button
                     onClick={handleExportJson}
-                    className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white text-xs font-bold flex items-center gap-1.5 transition-all"
+                    className="px-4 py-2 rounded-[18px] bg-white/[0.03] hover:bg-white/10 border border-white/15 text-white text-xs font-bold flex items-center gap-1.5 transition-all"
                   >
-                    <Download className="w-3.5 h-3.5" />
+                    <Download className="w-3.5 h-3.5 text-[#16A085]" />
                     <span>Download JSON</span>
                   </button>
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-3">
+              <div className="p-4 rounded-[18px] bg-white/[0.02] border border-white/10 space-y-3">
                 <div>
-                  <h4 className="text-sm font-bold text-white uppercase">Import Tournament JSON</h4>
-                  <p className="text-xs text-slate-400">Paste an exported JSON tournament configuration to overwrite or load arbitrary custom rosters instantly.</p>
+                  <h4 className="text-sm font-bold text-white uppercase font-poppins">Import Tournament JSON</h4>
+                  <p className="text-xs text-gray-400">Paste an exported JSON tournament configuration to overwrite or load arbitrary custom rosters instantly.</p>
                 </div>
 
                 <textarea
@@ -714,13 +714,13 @@ export const ContenderManagerModal: React.FC<ContenderManagerModalProps> = ({
                   onChange={(e) => setImportJsonText(e.target.value)}
                   placeholder="Paste tournament JSON configuration here..."
                   rows={6}
-                  className="w-full p-3 rounded-xl bg-black/70 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-cyan-400"
+                  className="w-full p-3 rounded-[18px] bg-white/[0.03] border-none text-white font-mono text-xs focus:outline-none focus:ring-1 focus:ring-[#16A085]"
                 />
 
                 <div className="flex justify-end">
                   <button
                     onClick={handleImportJson}
-                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-black uppercase text-xs tracking-wider shadow-lg shadow-cyan-500/30 transition-all active:scale-[0.98] flex items-center gap-1.5"
+                    className="px-5 py-2.5 rounded-[18px] bg-[#16A085] hover:bg-[#1abc9c] text-black font-black uppercase text-xs tracking-wider shadow-lg shadow-[#16A085]/30 transition-all active:scale-[0.98] flex items-center gap-1.5"
                   >
                     <Upload className="w-3.5 h-3.5" />
                     <span>Apply & Load JSON Roster</span>

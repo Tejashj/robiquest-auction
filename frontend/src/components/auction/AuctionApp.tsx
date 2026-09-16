@@ -4,15 +4,12 @@
  * ============================================================================
  * UNIFIED ENTERPRISE SPORTS AUCTION PLATFORM SHELL
  * RobiQuest 2026 Live Auction Arena • Conducted by RoboCell
- * Dedicated Role-Gated Architecture:
- *  1. 📺 Stadium Projector (4K Spectator Jumbotron - Default Public Mode)
- *  2. 🔨 Auction Admin (Live Auctioneer Desk - Protected by Admin PIN)
- *  3. 🙋 Franchise Bidder (Team Bidding Terminal - Protected by Team PIN)
- *
- * Integrated Features:
- *  - 🔐 PIN Authentication Gate Modal
- *  - 📋 Contender & Roster CMS Studio
- *  - ⚡ Live TV Broadcast Ticker
+ * Custom Flutter ThemeData Applied:
+ *  - Background: Pure Black (#000000)
+ *  - Primary: Persian Green (#16A085)
+ *  - Header / Foreground Accent: Champagne Gold (#D8CFB4)
+ *  - Typography: Google Fonts Poppins
+ *  - Border Radius: 18px (rounded-[18px])
  * ============================================================================
  */
 
@@ -141,7 +138,7 @@ export const AuctionApp: React.FC = () => {
   const authenticatedTeam = teams.find((t) => t.id === authenticatedTeamId);
 
   return (
-    <div className="min-h-screen bg-[#03060f] text-slate-100 flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200">
+    <div className="min-h-screen bg-black text-white font-poppins flex flex-col selection:bg-[#16A085]/40 selection:text-white">
       {/* Role Authentication Gate Modal */}
       <RoleAuthGateModal
         isOpen={isAuthModalOpen}
@@ -167,13 +164,13 @@ export const AuctionApp: React.FC = () => {
       />
 
       {/* =====================================================================
-          TOP NAVIGATION BAR (ROLE-GATED BROADCAST HUD)
+          APP BAR / TOP NAVIGATION (PURE BLACK #000000 + #D8CFB4 ACCENT)
           ===================================================================== */}
-      <header className="sticky top-0 z-40 bg-[#060a17]/95 border-b border-white/10 backdrop-blur-2xl px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3 shadow-2xl">
-        {/* Left: RoboCell Brand Identity */}
+      <header className="sticky top-0 z-40 bg-black border-b border-white/10 px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3 shadow-2xl">
+        {/* Left: RoboCell Brand Identity & Slogan */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-black border-2 border-cyan-400/50 p-0.5 shadow-lg shadow-cyan-500/20 overflow-hidden flex items-center justify-center flex-shrink-0">
+            <div className="w-11 h-11 rounded-[18px] bg-black border-2 border-[#16A085] p-0.5 shadow-lg shadow-[#16A085]/20 overflow-hidden flex items-center justify-center flex-shrink-0">
               <img
                 src="/robocell-crest.png"
                 alt="RoboCell Crest"
@@ -182,50 +179,50 @@ export const AuctionApp: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-base font-black tracking-tight text-white font-mono uppercase">
+                <span className="text-base font-black tracking-tight text-[#D8CFB4] uppercase font-poppins">
                   ROBIQUEST
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 animate-pulse">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[18px] text-[10px] font-bold bg-[#16A085]/20 text-[#16A085] border border-[#16A085]/40 animate-pulse">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#16A085]" />
                   LIVE
                 </span>
               </div>
-              <p className="text-xs text-slate-300 truncate max-w-[260px] sm:max-w-xs font-semibold flex items-center gap-1.5">
-                <span className="text-cyan-400 font-bold">RoboCell</span>
-                <span className="text-slate-500">•</span>
-                <span className="text-slate-400 font-normal">Tech, Transform, Thrive</span>
+              <p className="text-xs text-[#D8CFB4]/80 truncate max-w-[260px] sm:max-w-xs font-semibold flex items-center gap-1.5">
+                <span className="text-[#16A085] font-bold">RoboCell</span>
+                <span className="text-gray-500">•</span>
+                <span className="text-gray-400 font-normal">Tech, Transform, Thrive</span>
               </p>
             </div>
           </div>
 
-          <div className="hidden lg:flex items-center gap-2 pl-4 border-l border-white/10 text-xs font-mono">
-            <span className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-slate-300">
+          <div className="hidden lg:flex items-center gap-2 pl-4 border-l border-white/10 text-xs font-poppins">
+            <span className="px-2 py-0.5 rounded-[18px] bg-white/[0.03] border border-white/10 text-[#D8CFB4]">
               {profile.currency}
             </span>
-            <span className="text-slate-400">
+            <span className="text-gray-400">
               {lots.length} Contenders
             </span>
-            <span className="text-slate-600">•</span>
-            <span className="text-cyan-400 font-bold">
+            <span className="text-gray-600">•</span>
+            <span className="text-[#16A085] font-bold">
               {teams.length} Franchises
             </span>
           </div>
         </div>
 
-        {/* Center: 3 Role Tabs */}
-        <nav className="hidden md:flex items-center gap-1 p-1 bg-black/50 border border-white/10 rounded-2xl backdrop-blur-md">
+        {/* Center: 3 Role Tabs (Theme 18px Pill Navbar) */}
+        <nav className="hidden md:flex items-center gap-1 p-1 bg-white/[0.03] border border-white/10 rounded-[18px] backdrop-blur-md">
           {/* 1. Stadium Projector (Public Spectator View) */}
           <button
             onClick={() => handleTabClick('STADIUM_VIEWER')}
-            className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-1.5 rounded-[18px] text-xs font-bold transition-all ${
               activeTab === 'STADIUM_VIEWER'
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-black shadow-lg shadow-cyan-500/30 font-black'
-                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                ? 'bg-[#16A085] text-black shadow-lg shadow-[#16A085]/30 font-black'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
           >
             <Tv className="w-3.5 h-3.5" />
             Stadium Screen
-            <span className="px-1.5 py-0.2 rounded bg-cyan-400/20 text-[9px] text-cyan-300 border border-cyan-400/30 font-mono">
+            <span className="px-1.5 py-0.2 rounded-[18px] bg-black/40 text-[9px] text-black font-mono font-bold">
               4K
             </span>
           </button>
@@ -233,29 +230,29 @@ export const AuctionApp: React.FC = () => {
           {/* 2. Franchise Bidder Panel (Locked to Team PIN) */}
           <button
             onClick={() => handleTabClick('FRANCHISE_BIDDER')}
-            className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-1.5 rounded-[18px] text-xs font-bold transition-all ${
               activeTab === 'FRANCHISE_BIDDER'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-black shadow-lg shadow-emerald-500/30 font-black'
-                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                ? 'bg-[#16A085] text-black shadow-lg shadow-[#16A085]/30 font-black'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
           >
             <Users className="w-3.5 h-3.5" />
             <span>Franchise Cockpit</span>
-            {userRole !== 'BIDDER' && <Lock className="w-3 h-3 text-slate-500" />}
+            {userRole !== 'BIDDER' && <Lock className="w-3 h-3 text-gray-500" />}
           </button>
 
           {/* 3. Auction Admin (Locked to Admin PIN) */}
           <button
             onClick={() => handleTabClick('AUCTION_ADMIN')}
-            className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-1.5 rounded-[18px] text-xs font-bold transition-all ${
               activeTab === 'AUCTION_ADMIN'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-lg shadow-amber-500/30 font-black'
-                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                ? 'bg-[#16A085] text-black shadow-lg shadow-[#16A085]/30 font-black'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
           >
             <Gavel className="w-3.5 h-3.5" />
             <span>Auctioneer Desk</span>
-            {userRole !== 'ADMIN' && <Lock className="w-3 h-3 text-slate-500" />}
+            {userRole !== 'ADMIN' && <Lock className="w-3 h-3 text-gray-500" />}
           </button>
         </nav>
 
@@ -264,13 +261,13 @@ export const AuctionApp: React.FC = () => {
           {/* Active Role Indicator */}
           {userRole === 'ADMIN' ? (
             <div className="flex items-center gap-1.5">
-              <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-mono font-bold">
+              <span className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[18px] bg-[#16A085]/20 text-[#16A085] border border-[#16A085]/40 text-xs font-bold">
                 <Gavel className="w-3.5 h-3.5" />
                 <span>Auctioneer Authority</span>
               </span>
               <button
                 onClick={logoutRole}
-                className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-rose-400 hover:text-white transition-all"
+                className="p-2 rounded-[18px] bg-white/[0.03] hover:bg-white/10 border border-white/10 text-rose-400 hover:text-white transition-all"
                 title="Log Out & Lock Console"
               >
                 <LogOut className="w-4 h-4" />
@@ -279,11 +276,11 @@ export const AuctionApp: React.FC = () => {
           ) : userRole === 'BIDDER' && authenticatedTeam ? (
             <div className="flex items-center gap-1.5">
               <span
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold border"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[18px] text-xs font-bold border"
                 style={{
-                  backgroundColor: `${authenticatedTeam.color}25`,
+                  backgroundColor: `${authenticatedTeam.color}20`,
                   borderColor: authenticatedTeam.color,
-                  color: '#fff',
+                  color: '#ffffff',
                 }}
               >
                 <span className="w-2 h-2 rounded-full" style={{ backgroundColor: authenticatedTeam.color }} />
@@ -291,7 +288,7 @@ export const AuctionApp: React.FC = () => {
               </span>
               <button
                 onClick={logoutRole}
-                className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-rose-400 hover:text-white transition-all"
+                className="p-2 rounded-[18px] bg-white/[0.03] hover:bg-white/10 border border-white/10 text-rose-400 hover:text-white transition-all"
                 title="Release Franchise Terminal"
               >
                 <LogOut className="w-4 h-4" />
@@ -303,7 +300,7 @@ export const AuctionApp: React.FC = () => {
                 setAuthModalTab('ADMIN');
                 setIsAuthModalOpen(true);
               }}
-              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition-all active:scale-[0.98]"
+              className="px-4 py-2 rounded-[18px] bg-[#16A085] hover:bg-[#1abc9c] text-black text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-[#16A085]/20 transition-all active:scale-[0.98]"
             >
               <KeyRound className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Official Login</span>
@@ -314,10 +311,10 @@ export const AuctionApp: React.FC = () => {
           {/* Audio Mute Toggle */}
           <button
             onClick={toggleMute}
-            className={`p-2 rounded-xl border transition-all ${
+            className={`p-2 rounded-[18px] border transition-all ${
               isMuted
                 ? 'bg-red-500/10 border-red-500/30 text-red-400'
-                : 'bg-white/5 border-white/10 text-slate-300 hover:text-white hover:bg-white/10'
+                : 'bg-white/[0.03] border-white/10 text-gray-300 hover:text-white hover:bg-white/10'
             }`}
             title={isMuted ? 'Unmute Audio Cues' : 'Mute Audio Cues'}
           >
@@ -327,7 +324,7 @@ export const AuctionApp: React.FC = () => {
           {/* Fullscreen Toggle */}
           <button
             onClick={toggleFullScreen}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all hidden sm:flex"
+            className="p-2 rounded-[18px] bg-white/[0.03] hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white transition-all hidden sm:flex"
             title="Toggle Fullscreen Arena"
           >
             <Maximize2 className="w-4 h-4" />
@@ -350,24 +347,24 @@ export const AuctionApp: React.FC = () => {
       <LiveBroadcastTicker />
 
       {/* =====================================================================
-          FOOTER (ROBOCELL BRANDING & STEALTH ACCESS)
+          BOTTOM FOOTER (PURE BLACK + #D8CFB4)
           ===================================================================== */}
-      <footer className="bg-[#040714] border-t border-white/10 px-6 py-3 text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <footer className="bg-black border-t border-white/10 px-6 py-3 text-xs text-gray-400 flex flex-col sm:flex-row items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-white uppercase">ROBIQUEST 2026</span>
-          <span className="text-slate-600">•</span>
-          <span className="text-cyan-400 font-semibold">Conducted by RoboCell</span>
-          <span className="text-slate-600">•</span>
-          <span className="text-slate-400">Tech, Transform, Thrive</span>
+          <span className="font-bold text-[#D8CFB4] uppercase">ROBIQUEST 2026</span>
+          <span className="text-gray-600">•</span>
+          <span className="text-[#16A085] font-semibold">Conducted by RoboCell</span>
+          <span className="text-gray-600">•</span>
+          <span className="text-gray-400">Tech, Transform, Thrive</span>
         </div>
 
-        <div className="flex items-center gap-4 text-[11px] font-mono">
+        <div className="flex items-center gap-4 text-[11px]">
           <button
             onClick={() => {
               setAuthModalTab('ADMIN');
               setIsAuthModalOpen(true);
             }}
-            className="hover:text-cyan-300 transition-colors flex items-center gap-1"
+            className="hover:text-[#16A085] transition-colors flex items-center gap-1 text-[#D8CFB4]"
           >
             <KeyRound className="w-3 h-3" />
             <span>Role Sign-In</span>
@@ -375,7 +372,7 @@ export const AuctionApp: React.FC = () => {
 
           <button
             onClick={() => setIsSoftwareAdminModalOpen(true)}
-            className="hover:text-amber-300 transition-colors opacity-60 hover:opacity-100 flex items-center gap-1"
+            className="hover:text-[#16A085] transition-colors opacity-60 hover:opacity-100 flex items-center gap-1 text-gray-400"
             title="Software Maintenance (Ctrl+Shift+S)"
           >
             <Lock className="w-3 h-3" />

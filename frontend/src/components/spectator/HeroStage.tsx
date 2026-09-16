@@ -98,30 +98,30 @@ export const HeroStage: React.FC = () => {
   const badge = getStatusBadge();
 
   return (
-    <div className="relative w-full rounded-3xl bg-gradient-to-b from-[#080d21] via-[#050814] to-[#03060f] border border-cyan-500/30 p-6 xl:p-8 shadow-2xl overflow-hidden">
-      {/* Dynamic Ambient Backlight matching Leading Team Color or Cyan Default */}
+    <div className="relative w-full rounded-[18px] bg-black border border-[#16A085]/30 p-6 xl:p-8 shadow-2xl overflow-hidden">
+      {/* Dynamic Ambient Backlight matching Leading Team Color or Emerald Default */}
       <div
         className="absolute -top-32 -left-32 w-96 h-96 rounded-full blur-[140px] opacity-25 transition-colors duration-1000 pointer-events-none"
-        style={{ backgroundColor: leadingTeam?.color || '#06b6d4' }}
+        style={{ backgroundColor: leadingTeam?.color || '#16A085' }}
       />
       <div
         className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full blur-[140px] opacity-20 transition-colors duration-1000 pointer-events-none"
-        style={{ backgroundColor: leadingTeam?.accentColor || '#3b82f6' }}
+        style={{ backgroundColor: leadingTeam?.accentColor || '#D8CFB4' }}
       />
 
       {/* STAGE HEADER: STATUS BANNER & LOT IDENTIFIERS */}
       <div className="relative z-10 flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <span className="px-4 py-1.5 rounded-xl text-xs xl:text-sm font-mono font-black bg-white/10 text-amber-300 border border-amber-400/30 tracking-wider shadow-inner flex items-center gap-1.5">
-            <Flame className="w-3.5 h-3.5 text-amber-400" />
+          <span className="px-4 py-1.5 rounded-[18px] text-xs xl:text-sm font-mono font-black bg-white/[0.03] text-[#D8CFB4] border border-[#16A085]/40 tracking-wider flex items-center gap-1.5">
+            <Flame className="w-3.5 h-3.5 text-[#16A085]" />
             LOT #{activeLot.lotNumber}
           </span>
-          <span className="px-3.5 py-1.5 rounded-xl text-xs xl:text-sm font-bold uppercase tracking-wider bg-white/5 text-slate-300 border border-white/10">
+          <span className="px-3.5 py-1.5 rounded-[18px] text-xs xl:text-sm font-bold uppercase tracking-wider bg-white/[0.03] text-gray-300 border border-white/10">
             {activeLot.category}
           </span>
           {activeLot.roleBadge && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[18px] text-xs font-mono font-bold bg-[#16A085]/20 text-[#16A085] border border-[#16A085]/40">
+              <Sparkles className="w-3.5 h-3.5 text-[#16A085]" />
               {activeLot.roleBadge}
             </span>
           )}
@@ -129,7 +129,7 @@ export const HeroStage: React.FC = () => {
 
         {/* Status Badge */}
         <div
-          className={`inline-flex items-center gap-2 px-5 py-2 rounded-2xl text-xs xl:text-sm font-black uppercase tracking-widest border shadow-xl ${badge.color}`}
+          className={`inline-flex items-center gap-2 px-5 py-2 rounded-[18px] text-xs xl:text-sm font-black uppercase tracking-widest border shadow-xl ${badge.color}`}
         >
           {badge.icon}
           <span>{badge.text}</span>
@@ -140,40 +140,40 @@ export const HeroStage: React.FC = () => {
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-8 items-stretch pt-6">
         {/* LEFT: LOT PORTRAIT & SPORTS ATTRIBUTES (5 COLS) */}
         <div className="lg:col-span-5 flex flex-col justify-between space-y-4">
-          <div className="relative aspect-[4/3] sm:aspect-[16/10] rounded-3xl overflow-hidden bg-gradient-to-t from-black via-slate-950/60 to-transparent border-2 border-cyan-500/30 shadow-2xl group">
+          <div className="relative aspect-[4/3] sm:aspect-[16/10] rounded-[18px] overflow-hidden bg-black border-2 border-[#16A085]/40 shadow-2xl group">
             <img
               src={activeLot.imageUrls[0] || 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800'}
               alt={activeLot.title}
               className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#04060d] via-black/30 to-transparent opacity-90" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-90" />
 
             {/* Overlaid Title & Category */}
-            <div className="absolute bottom-3 left-3 right-3 p-3.5 rounded-2xl bg-black/75 backdrop-blur-xl border border-white/15">
-              <div className="flex items-center justify-between text-[11px] font-mono font-bold text-cyan-400 uppercase tracking-widest mb-0.5">
+            <div className="absolute bottom-3 left-3 right-3 p-3.5 rounded-[18px] bg-black/85 backdrop-blur-xl border border-white/15">
+              <div className="flex items-center justify-between text-[11px] font-mono font-bold text-[#16A085] uppercase tracking-widest mb-0.5">
                 <span>ROBIQUEST CONTENDER #{activeLot.lotNumber}</span>
                 {stats.winRate && (
-                  <span className="text-amber-400 font-bold flex items-center gap-1">
-                    <Award className="w-3 h-3" />
+                  <span className="text-[#D8CFB4] font-bold flex items-center gap-1">
+                    <Award className="w-3 h-3 text-[#16A085]" />
                     {stats.winRate} Win
                   </span>
                 )}
               </div>
-              <h2 className="text-lg xl:text-xl font-black text-white tracking-tight uppercase truncate">
+              <h2 className="text-lg xl:text-xl font-black text-[#D8CFB4] tracking-tight uppercase truncate font-poppins">
                 {activeLot.title}
               </h2>
             </div>
           </div>
 
           {/* Sports Performance Radar / Rating Bars */}
-          <div className="p-4 rounded-2xl bg-[#050a18]/90 border border-white/10 backdrop-blur-xl space-y-3">
-            <div className="flex items-center justify-between text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider">
-              <span className="flex items-center gap-1.5 text-cyan-400">
+          <div className="p-4 rounded-[18px] bg-white/[0.03] border border-white/10 backdrop-blur-xl space-y-3">
+            <div className="flex items-center justify-between text-[11px] font-mono font-bold text-gray-400 uppercase tracking-wider">
+              <span className="flex items-center gap-1.5 text-[#16A085]">
                 <Activity className="w-3.5 h-3.5" />
                 Performance Telemetry
               </span>
               {stats.specialty && (
-                <span className="text-slate-300 font-normal truncate max-w-[200px]">
+                <span className="text-gray-300 font-normal truncate max-w-[200px]">
                   {stats.specialty}
                 </span>
               )}
@@ -182,13 +182,13 @@ export const HeroStage: React.FC = () => {
             <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
               {/* Power */}
               <div>
-                <div className="flex justify-between text-[10px] font-mono text-slate-300 mb-1">
+                <div className="flex justify-between text-[10px] font-mono text-gray-300 mb-1">
                   <span>⚡ Power / Torque</span>
-                  <strong className="text-amber-400">{stats.power}/100</strong>
+                  <strong className="text-[#16A085]">{stats.power}/100</strong>
                 </div>
                 <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-500"
+                    className="h-full rounded-full bg-[#16A085] transition-all duration-500"
                     style={{ width: `${stats.power}%` }}
                   />
                 </div>
@@ -196,13 +196,13 @@ export const HeroStage: React.FC = () => {
 
               {/* Velocity */}
               <div>
-                <div className="flex justify-between text-[10px] font-mono text-slate-300 mb-1">
+                <div className="flex justify-between text-[10px] font-mono text-gray-300 mb-1">
                   <span>🚀 Agility / Speed</span>
-                  <strong className="text-cyan-400">{stats.velocity}/100</strong>
+                  <strong className="text-[#16A085]">{stats.velocity}/100</strong>
                 </div>
                 <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-500"
+                    className="h-full rounded-full bg-[#16A085] transition-all duration-500"
                     style={{ width: `${stats.velocity}%` }}
                   />
                 </div>
@@ -210,13 +210,13 @@ export const HeroStage: React.FC = () => {
 
               {/* Armor */}
               <div>
-                <div className="flex justify-between text-[10px] font-mono text-slate-300 mb-1">
+                <div className="flex justify-between text-[10px] font-mono text-gray-300 mb-1">
                   <span>🛡️ Durability / Armor</span>
-                  <strong className="text-rose-400">{stats.armor}/100</strong>
+                  <strong className="text-[#D8CFB4]">{stats.armor}/100</strong>
                 </div>
                 <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-rose-500 to-red-500 transition-all duration-500"
+                    className="h-full rounded-full bg-[#D8CFB4] transition-all duration-500"
                     style={{ width: `${stats.armor}%` }}
                   />
                 </div>
@@ -224,13 +224,13 @@ export const HeroStage: React.FC = () => {
 
               {/* AI IQ */}
               <div>
-                <div className="flex justify-between text-[10px] font-mono text-slate-300 mb-1">
+                <div className="flex justify-between text-[10px] font-mono text-gray-300 mb-1">
                   <span>🧠 AI / SLAM IQ</span>
-                  <strong className="text-purple-400">{stats.aiCompute}/100</strong>
+                  <strong className="text-[#16A085]">{stats.aiCompute}/100</strong>
                 </div>
                 <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-500"
+                    className="h-full rounded-full bg-[#16A085] transition-all duration-500"
                     style={{ width: `${stats.aiCompute}%` }}
                   />
                 </div>
@@ -242,25 +242,25 @@ export const HeroStage: React.FC = () => {
         {/* RIGHT: MEGA SPRING BID COUNTER & LEADING FRANCHISE (7 COLS) */}
         <div className="lg:col-span-7 flex flex-col justify-between gap-5">
           {/* Highest Bid Showcase */}
-          <div className="p-6 xl:p-8 rounded-3xl bg-[#090f26]/90 border border-cyan-500/30 backdrop-blur-xl shadow-2xl relative overflow-hidden space-y-4">
+          <div className="p-6 xl:p-8 rounded-[18px] bg-white/[0.03] border border-[#16A085]/30 backdrop-blur-xl shadow-2xl relative overflow-hidden space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs xl:text-sm uppercase font-mono font-black tracking-widest text-cyan-400 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-cyan-400" />
+              <span className="text-xs xl:text-sm uppercase font-mono font-black tracking-widest text-[#16A085] flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-[#16A085]" />
                 Current Highest Bid
               </span>
-              <span className="text-xs font-mono text-slate-400">
-                Opening Base: <strong className="text-slate-200">{formatAuctionCurrency(activeLot.startingBid, profile.currency)}</strong>
+              <span className="text-xs font-mono text-gray-400">
+                Opening Base: <strong className="text-white">{formatAuctionCurrency(activeLot.startingBid, profile.currency)}</strong>
               </span>
             </div>
 
-            {/* Oversized Neon Bid Display */}
-            <div className="text-5xl sm:text-6xl xl:text-7xl font-black font-mono tracking-tight text-white drop-shadow-[0_0_25px_rgba(6,182,212,0.3)]">
+            {/* Oversized Bid Display */}
+            <div className="text-5xl sm:text-6xl xl:text-7xl font-black font-mono tracking-tight text-[#D8CFB4]">
               {formatAuctionCurrency(activeLot.currentHighBid, profile.currency)}
             </div>
 
             <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs xl:text-sm">
-              <span className="text-slate-400 font-mono">Minimum Next Increment:</span>
-              <span className="font-mono font-black text-amber-300">
+              <span className="text-gray-400 font-mono">Minimum Next Increment:</span>
+              <span className="font-mono font-black text-[#16A085]">
                 +{formatAuctionCurrency(activeLot.minIncrement, profile.currency)}
               </span>
             </div>
@@ -270,35 +270,35 @@ export const HeroStage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
             {/* Leading Bidder Card */}
             <div
-              className="sm:col-span-8 p-5 rounded-3xl border transition-all flex items-center gap-4 relative overflow-hidden shadow-xl"
+              className="sm:col-span-8 p-5 rounded-[18px] border transition-all flex items-center gap-4 relative overflow-hidden shadow-xl"
               style={{
-                backgroundColor: leadingTeam ? `${leadingTeam.color}20` : '#080d19',
+                backgroundColor: leadingTeam ? `${leadingTeam.color}20` : '#000000',
                 borderColor: leadingTeam ? leadingTeam.color : 'rgba(255,255,255,0.1)',
                 boxShadow: leadingTeam ? `0 0 25px ${leadingTeam.color}30` : undefined,
               }}
             >
               {leadingTeam ? (
                 <div
-                  className="w-14 h-14 xl:w-16 xl:h-16 rounded-2xl overflow-hidden border-2 shadow-xl flex-shrink-0 bg-black/60 p-1"
+                  className="w-14 h-14 xl:w-16 xl:h-16 rounded-[18px] overflow-hidden border-2 shadow-xl flex-shrink-0 bg-black p-1"
                   style={{ borderColor: leadingTeam.color }}
                 >
                   <img src={leadingTeam.logoUrl} alt={leadingTeam.name} className="w-full h-full object-contain" />
                 </div>
               ) : (
-                <div className="w-14 h-14 xl:w-16 xl:h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400">
+                <div className="w-14 h-14 xl:w-16 xl:h-16 rounded-[18px] bg-white/[0.03] border border-white/10 flex items-center justify-center text-gray-400">
                   <Shield className="w-6 h-6" />
                 </div>
               )}
 
               <div className="truncate">
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] uppercase tracking-widest font-mono font-bold text-slate-400 flex items-center gap-1.5">
-                    <Shield className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="text-[11px] uppercase tracking-widest font-mono font-bold text-gray-400 flex items-center gap-1.5">
+                    <Shield className="w-3.5 h-3.5 text-[#16A085]" />
                     Leading Franchise
                   </span>
                   {leadingTeam && (
                     <span
-                      className="text-xs font-mono font-black px-2 py-0.2 rounded"
+                      className="text-xs font-mono font-black px-2 py-0.2 rounded-[18px]"
                       style={{ backgroundColor: `${leadingTeam.color}30`, color: leadingTeam.accentColor }}
                     >
                       PADDLE #{leadingTeam.paddleNumber}
@@ -306,14 +306,14 @@ export const HeroStage: React.FC = () => {
                   )}
                 </div>
 
-                <h3 className="text-lg xl:text-xl font-black text-white tracking-tight uppercase mt-1 truncate">
+                <h3 className="text-lg xl:text-xl font-black text-white tracking-tight uppercase mt-1 truncate font-poppins">
                   {activeLot.currentLeaderName || 'Awaiting Floor Bid'}
                 </h3>
               </div>
             </div>
 
             {/* Circular Countdown Clock */}
-            <div className="sm:col-span-4 p-4 rounded-3xl bg-[#080e22]/90 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center relative shadow-xl">
+            <div className="sm:col-span-4 p-4 rounded-[18px] bg-white/[0.03] border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center relative shadow-xl">
               <div className="relative w-28 h-28 flex items-center justify-center">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                   <circle cx="50" cy="50" r={circleRadius} className="text-white/10 stroke-current" strokeWidth="7" fill="transparent" />
@@ -321,7 +321,7 @@ export const HeroStage: React.FC = () => {
                     cx="50"
                     cy="50"
                     r={circleRadius}
-                    className={isLowTime ? 'text-red-500 stroke-current animate-pulse' : 'text-cyan-400 stroke-current'}
+                    className={isLowTime ? 'text-red-500 stroke-current animate-pulse' : 'text-[#16A085] stroke-current'}
                     strokeWidth="7"
                     strokeDasharray={circumference}
                     strokeDashoffset={strokeOffset}
@@ -334,7 +334,7 @@ export const HeroStage: React.FC = () => {
                   <span className={`text-2xl xl:text-3xl font-black ${isLowTime ? 'text-red-400 animate-bounce' : 'text-white'}`}>
                     {clock.remainingSeconds}s
                   </span>
-                  <span className="text-[9px] uppercase tracking-widest text-slate-400 font-bold">
+                  <span className="text-[9px] uppercase tracking-widest text-gray-400 font-bold">
                     {clock.status}
                   </span>
                 </div>
