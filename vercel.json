@@ -5,7 +5,9 @@
       "framework": "nextjs"
     },
     "backend": {
-      "root": "backend"
+      "root": "backend",
+      "framework": "fastify",
+      "entrypoint": "src/server.ts"
     }
   },
   "rewrites": [

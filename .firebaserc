@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "eldergo-b60d0"
+  },
+  "targets": {
+    "eldergo-b60d0": {
+      "hosting": {
+        "robiquest": [
+          "robiquest-auction"
+        ]
+      }
+    }
+  }
+}
