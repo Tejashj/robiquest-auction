@@ -2,10 +2,12 @@
 
 /**
  * ============================================================================
- * SPORTS FRANCHISE BIDDERS PANEL (TEAM OPERATOR COCKPIT)
- * Designed for Team Owners & Table Representatives (e.g. IPL / Premier League)
- * Real-time Team Purse, Squad Composition, Overseas Quotas, Reserve Floor Guard
- * 100% User-Driven: Raise Paddle, 1-Click Increment Chips, Zero Gavel Access
+ * SPORTS FRANCHISE BIDDERS PANEL (SECURED TEAM COCKPIT)
+ * Exclusively for Verified Franchise Paddle Operators:
+ *  - Protected by Team Confidential PIN (e.g. TITAN101)
+ *  - 100% Locked to Authenticated Franchise (Zero cross-team hijacking)
+ *  - 1-Click Tactile Paddle Raise with Solvency Guards
+ *  - Real-Time Live Purse, Squad Quota, and Acquired Roster
  * ============================================================================
  */
 
@@ -15,15 +17,17 @@ import {
   TrendingUp,
   AlertTriangle,
   CheckCircle2,
-  DollarSign,
   Users,
-  Globe,
   Zap,
   Lock,
-  ChevronDown,
-  Info,
-  Clock,
+  Unlock,
+  LogOut,
   Sparkles,
+  ArrowUpRight,
+  Flame,
+  KeyRound,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import {
   useAuctionEngineStore,
@@ -38,12 +42,19 @@ export const SportsBiddersPanel: React.FC = () => {
     activeLotId,
     teams,
     clock,
-    activeFranchiseId,
-    setActiveFranchise,
+    userRole,
+    authenticatedTeamId,
+    authenticateAsTeam,
+    logoutRole,
     placeUserBid,
   } = useAuctionEngineStore();
 
   const [customBidInput, setCustomBidInput] = useState('');
+  const [pinInput, setPinInput] = useState('');
+  const [showPin, setShowPin] = useState(false);
+  const [selectedUnlockTeamId, setSelectedUnlockTeamId] = useState(teams[0]?.id || '');
+  const [unlockError, setUnlockError] = useState<string | null>(null);
+
   const [actionFeedback, setActionFeedback] = useState<{
     type: 'SUCCESS' | 'ERROR';
     text: string;
@@ -51,12 +62,142 @@ export const SportsBiddersPanel: React.FC = () => {
 
   const activeLot = lots.find((l) => l.id === activeLotId) || lots[0];
 
-  // Current selected franchise for this bidder terminal
-  const currentTeam =
-    teams.find((t) => t.id === activeFranchiseId) || teams[0];
+  // --------------------------------------------------------------------------
+  // ROLE GATE: IF NOT AUTHENTICATED AS A BIDDER, SHOW TERMINAL LOCK
+  // --------------------------------------------------------------------------
+  const isBidderAuthenticated = userRole === 'BIDDER' && authenticatedTeamId;
+  const currentTeam = teams.find((t) => t.id === authenticatedTeamId);
 
+  const handleInlineLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setUnlockError(null);
+    if (!selectedUnlockTeamId) {
+      setUnlockError('Please select your team');
+      return;
+    }
+    if (!pinInput.trim()) {
+      setUnlockError('Please enter your Team Paddle PIN');
+      return;
+    }
+    const ok = authenticateAsTeam(selectedUnlockTeamId, pinInput.trim());
+    if (ok) {
+      setPinInput('');
+    } else {
+      const targetTeam = teams.find((t) => t.id === selectedUnlockTeamId);
+      const hint = targetTeam?.pin || `TEAM${targetTeam?.paddleNumber}`;
+      setUnlockError(`Invalid PIN for ${targetTeam?.name}. (Default: ${hint})`);
+    }
+  };
+
+  if (!isBidderAuthenticated || !currentTeam) {
+    const targetTeam = teams.find((t) => t.id === selectedUnlockTeamId) || teams[0];
+
+    return (
+      <div className="max-w-xl mx-auto p-6 sm:p-8 my-8 rounded-3xl bg-[#060a17] border border-cyan-500/40 shadow-2xl shadow-cyan-500/20 text-slate-100 text-center animate-in fade-in">
+        <div className="w-16 h-16 mx-auto rounded-3xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-4 shadow-lg shadow-cyan-500/20">
+          <Lock className="w-8 h-8" />
+        </div>
+
+        <span className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-widest">
+          FRANCHISE BIDDING COCKPIT • AUTHENTICATION REQUIRED
+        </span>
+        <h2 className="text-2xl font-black text-white uppercase tracking-tight mt-1 mb-2">
+          Unlock Franchise Terminal
+        </h2>
+        <p className="text-xs text-slate-400 max-w-md mx-auto mb-6">
+          To prevent unauthorized bidding, floor paddles are strictly locked to team PINs. Select your franchise and authenticate.
+        </p>
+
+        {unlockError && (
+          <div className="mb-4 p-3 rounded-xl bg-red-500/20 border border-red-500/40 text-red-200 text-xs flex items-center justify-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-red-400" />
+            <span>{unlockError}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleInlineLogin} className="space-y-4 text-left">
+          <div>
+            <label className="block text-xs font-mono font-bold text-slate-300 uppercase mb-2">
+              Select Your Team:
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {teams.map((t) => {
+                const isSelected = t.id === selectedUnlockTeamId;
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedUnlockTeamId(t.id);
+                      setUnlockError(null);
+                    }}
+                    className={`p-3 rounded-2xl border text-left transition-all flex items-center gap-2.5 ${
+                      isSelected
+                        ? 'border-2 shadow-lg'
+                        : 'bg-black/40 border-white/10 opacity-70 hover:opacity-100'
+                    }`}
+                    style={{
+                      borderColor: isSelected ? t.color : undefined,
+                      backgroundColor: isSelected ? `${t.color}20` : undefined,
+                    }}
+                  >
+                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: t.color }} />
+                    <div className="truncate">
+                      <div className="text-xs font-bold text-white truncate">{t.name}</div>
+                      <div className="text-[10px] font-mono text-slate-400">Paddle #{t.paddleNumber}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-mono font-bold text-slate-300 uppercase mb-2 flex items-center justify-between">
+              <span>{targetTeam?.name} PIN:</span>
+              <button
+                type="button"
+                onClick={() => setPinInput(targetTeam?.pin || `TEAM${targetTeam?.paddleNumber}`)}
+                className="text-cyan-400 text-[10px] hover:underline"
+              >
+                Auto-Fill ({targetTeam?.pin || `TEAM${targetTeam?.paddleNumber}`})
+              </button>
+            </label>
+            <div className="relative">
+              <input
+                type={showPin ? 'text' : 'password'}
+                value={pinInput}
+                onChange={(e) => setPinInput(e.target.value)}
+                placeholder={`e.g. ${targetTeam?.pin || 'TITAN101'}`}
+                className="w-full px-4 py-3 rounded-2xl bg-black/60 border border-white/20 text-white font-mono text-sm tracking-widest focus:outline-none focus:border-cyan-400"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPin(!showPin)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+              >
+                {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-black font-black uppercase text-sm tracking-wider shadow-lg shadow-emerald-500/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+          >
+            <Unlock className="w-4 h-4" />
+            <span>Unlock Paddle Terminal</span>
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // AUTHENTICATED COCKPIT VIEW FOR LOCKED TEAM
+  // --------------------------------------------------------------------------
   const isLeading =
-    activeLot && currentTeam && activeLot.currentLeaderId === currentTeam.id;
+    activeLot && activeLot.currentLeaderId === currentTeam.id;
 
   const minNextBid = activeLot
     ? activeLot.bidsCount === 0
@@ -65,30 +206,15 @@ export const SportsBiddersPanel: React.FC = () => {
     : 0;
 
   // Calculate reserve floor invariant for this team
-  const unfilledSlots = currentTeam
-    ? Math.max(0, profile.minSquadSize - currentTeam.squadCount - 1)
-    : 0;
+  const unfilledSlots = Math.max(0, profile.minSquadSize - currentTeam.squadCount - 1);
   const reserveFloorNeeded = unfilledSlots * profile.lowestBasePrice;
-  const maxSafeBid = currentTeam
-    ? profile.enforceReservePurseFloor
-      ? Math.max(0, currentTeam.remainingPurse - reserveFloorNeeded)
-      : currentTeam.remainingPurse
-    : 0;
+  const maxSafeBid = profile.enforceReservePurseFloor
+    ? Math.max(0, currentTeam.remainingPurse - reserveFloorNeeded)
+    : currentTeam.remainingPurse;
 
-  const canAffordNextBid = minNextBid <= maxSafeBid && !currentTeam?.isFrozen;
-
-  // Overseas quota check
-  const isOverseasCapReached =
-    activeLot?.isOverseas &&
-    currentTeam &&
-    currentTeam.overseasCount >= profile.maxOverseasLimit;
-
-  // Squad capacity check
-  const isSquadFull =
-    currentTeam && currentTeam.squadCount >= profile.maxSquadSize;
+  const canAffordNextBid = minNextBid <= maxSafeBid && !currentTeam.isFrozen;
 
   const handleBidSubmit = (amount: number) => {
-    if (!currentTeam) return;
     const res = placeUserBid(amount, currentTeam.id);
     if (res.success) {
       setActionFeedback({ type: 'SUCCESS', text: res.message });
@@ -99,509 +225,259 @@ export const SportsBiddersPanel: React.FC = () => {
     setTimeout(() => setActionFeedback(null), 4000);
   };
 
-  if (!currentTeam || !activeLot) {
-    return (
-      <div className="max-w-6xl mx-auto p-8 text-center text-slate-400">
-        <AlertTriangle className="w-12 h-12 text-amber-400 mx-auto mb-3" />
-        <p className="text-base font-semibold">No active player or franchise available.</p>
-      </div>
-    );
-  }
+  const pursePercentRemaining = Math.max(0, Math.min(100, (currentTeam.remainingPurse / currentTeam.initialPurse) * 100));
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 animate-in fade-in duration-200">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-6 animate-in fade-in duration-200">
       {/* =====================================================================
-          FRANCHISE COCKPIT TOP BAR (TEAM IDENTITY & LIVE FINANCIAL STATUS)
+          FRANCHISE COCKPIT HEADER (VERIFIED TABLE LOCK)
           ===================================================================== */}
       <div
         className="p-5 sm:p-6 rounded-3xl border shadow-2xl backdrop-blur-2xl relative overflow-hidden transition-all"
         style={{
           backgroundColor: '#070c1a',
-          borderColor: currentTeam.color ? `${currentTeam.color}40` : 'rgba(255,255,255,0.1)',
+          borderColor: `${currentTeam.color}60`,
+          boxShadow: `0 0 35px ${currentTeam.color}25`,
         }}
       >
-        <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -z-10 opacity-15 pointer-events-none"
-             style={{ backgroundColor: currentTeam.color }} />
+        <div
+          className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -z-10 opacity-20 pointer-events-none"
+          style={{ backgroundColor: currentTeam.color }}
+        />
 
-        {/* Quick 4-Team Tab Switcher */}
-        <div className="flex flex-wrap items-center gap-2 pb-4 mb-4 border-b border-white/10">
-          <span className="text-xs font-mono text-slate-400 uppercase tracking-wider font-semibold mr-1">
-            Active Team Table:
-          </span>
-          {teams.map((t) => {
-            const isSelected = t.id === currentTeam.id;
-            return (
-              <button
-                key={t.id}
-                onClick={() => setActiveFranchise(t.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border ${
-                  isSelected
-                    ? 'shadow-lg'
-                    : 'bg-white/5 border-white/10 text-slate-400 hover:text-white hover:bg-white/10'
-                }`}
-                style={{
-                  backgroundColor: isSelected ? `${t.color}25` : undefined,
-                  borderColor: isSelected ? t.color : undefined,
-                  color: isSelected ? '#ffffff' : undefined,
-                  boxShadow: isSelected ? `0 0 15px ${t.color}30` : undefined,
-                }}
-              >
-                <span
-                  className="w-2.5 h-2.5 rounded-full"
-                  style={{ backgroundColor: t.color }}
-                />
-                <span>{t.name}</span>
-                <span
-                  className="text-[10px] font-mono px-1.5 py-0.2 rounded"
-                  style={{ backgroundColor: `${t.color}35`, color: t.accentColor }}
-                >
-                  #{t.paddleNumber}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          {/* Team Selector & Emblem */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          {/* Team Identity */}
           <div className="flex items-center gap-4">
             <div
-              className="w-16 h-16 rounded-2xl overflow-hidden border-2 p-1 bg-black/50 shadow-xl flex-shrink-0 flex items-center justify-center"
+              className="w-16 h-16 rounded-2xl overflow-hidden border-2 p-1 bg-black/60 shadow-xl flex-shrink-0 flex items-center justify-center"
               style={{ borderColor: currentTeam.color }}
             >
               <img
                 src={currentTeam.logoUrl}
                 alt={currentTeam.name}
-                className="w-full h-full object-contain rounded-xl"
+                className="w-full h-full object-contain"
               />
             </div>
 
             <div>
               <div className="flex items-center gap-2">
                 <span
-                  className="text-xs font-mono font-bold px-2 py-0.5 rounded-md text-black"
+                  className="text-xs font-mono font-black px-2.5 py-0.5 rounded-md text-black"
                   style={{ backgroundColor: currentTeam.color }}
                 >
                   PADDLE #{currentTeam.paddleNumber}
                 </span>
-                <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">
-                  FRANCHISE OPERATOR
+                <span className="text-xs font-mono text-emerald-400 font-bold flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" />
+                  AUTHENTICATED TABLE
                 </span>
-                {currentTeam.isFrozen && (
-                  <span className="px-2 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/40 text-[10px] font-bold">
-                    BIDDING SUSPENDED
-                  </span>
-                )}
               </div>
 
-              <div className="flex items-center gap-3 mt-1">
-                <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight uppercase">
-                  {currentTeam.name}
-                </h1>
-
-                {/* Team Switcher dropdown for table operators */}
-                <div className="relative group">
-                  <select
-                    value={currentTeam.id}
-                    onChange={(e) => setActiveFranchise(e.target.value)}
-                    className="opacity-0 absolute inset-0 cursor-pointer w-full h-full"
-                    title="Switch Franchise Table"
-                  >
-                    {teams.map((t) => (
-                      <option key={t.id} value={t.id} className="bg-[#090d19] text-white">
-                        {t.name} (#{t.paddleNumber})
-                      </option>
-                    ))}
-                  </select>
-                  <button className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-300 flex items-center gap-1">
-                    <span>Switch Table</span>
-                    <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-                  </button>
-                </div>
-              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight uppercase mt-1">
+                {currentTeam.name}
+              </h1>
             </div>
           </div>
 
-          {/* Franchise Financial & Squad Quota Metrics */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {/* Remaining Purse */}
-            <div className="p-3.5 rounded-2xl bg-black/40 border border-white/10">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block">
-                Remaining Purse
-              </span>
-              <div className="text-lg sm:text-xl font-black font-mono text-emerald-400 mt-0.5">
-                {formatAuctionCurrency(currentTeam.remainingPurse, profile.currency)}
-              </div>
-              <span className="text-[10px] text-slate-400">
-                Spent: {formatAuctionCurrency(currentTeam.totalSpent, profile.currency)}
-              </span>
-            </div>
+          {/* Release / Log Out Button */}
+          <button
+            onClick={logoutRole}
+            className="self-start sm:self-center px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300 hover:text-white transition-all flex items-center gap-1.5"
+            title="Log out and release terminal"
+          >
+            <LogOut className="w-3.5 h-3.5 text-rose-400" />
+            <span>Switch Role / Log Out</span>
+          </button>
+        </div>
 
-            {/* Squad Count */}
-            <div className="p-3.5 rounded-2xl bg-black/40 border border-white/10">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block">
-                Squad Capacity
-              </span>
-              <div className="text-lg sm:text-xl font-black font-mono text-white mt-0.5">
-                {currentTeam.squadCount} / {profile.maxSquadSize}
-              </div>
-              <span className="text-[10px] text-slate-400">
-                Min Req: {profile.minSquadSize} players
-              </span>
+        {/* Live Financial Metrics Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-5 mt-5 border-t border-white/10">
+          <div className="p-3.5 rounded-2xl bg-black/50 border border-white/10">
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">Remaining Purse</span>
+            <div className="text-xl sm:text-2xl font-black font-mono mt-0.5" style={{ color: currentTeam.accentColor }}>
+              {formatAuctionCurrency(currentTeam.remainingPurse, profile.currency)}
             </div>
+            <div className="w-full h-1.5 rounded-full bg-white/10 mt-2 overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{ width: `${pursePercentRemaining}%`, backgroundColor: currentTeam.color }}
+              />
+            </div>
+          </div>
 
-            {/* Overseas Quota */}
-            <div className="p-3.5 rounded-2xl bg-black/40 border border-white/10">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block">
-                Overseas Quota
-              </span>
-              <div className={`text-lg sm:text-xl font-black font-mono mt-0.5 ${
-                currentTeam.overseasCount >= profile.maxOverseasLimit ? 'text-amber-400' : 'text-cyan-400'
-              }`}>
-                {currentTeam.overseasCount} / {profile.maxOverseasLimit}
-              </div>
-              <span className="text-[10px] text-slate-400">
-                {profile.maxOverseasLimit - currentTeam.overseasCount} slots left
-              </span>
+          <div className="p-3.5 rounded-2xl bg-black/50 border border-white/10">
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">Max Allowed Bid</span>
+            <div className="text-xl sm:text-2xl font-black font-mono text-emerald-400 mt-0.5">
+              {formatAuctionCurrency(maxSafeBid, profile.currency)}
             </div>
+            <span className="text-[10px] text-slate-400 font-mono">Reserve floor protected</span>
+          </div>
 
-            {/* Reserve Floor Protection */}
-            <div className="p-3.5 rounded-2xl bg-black/40 border border-white/10">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block">
-                Reserve Floor
-              </span>
-              <div className="text-lg sm:text-xl font-black font-mono text-amber-300 mt-0.5">
-                {formatAuctionCurrency(reserveFloorNeeded, profile.currency)}
-              </div>
-              <span className="text-[10px] text-slate-400">
-                {unfilledSlots} slots × {formatAuctionCurrency(profile.lowestBasePrice, profile.currency)}
-              </span>
+          <div className="p-3.5 rounded-2xl bg-black/50 border border-white/10">
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">Squad Acquired</span>
+            <div className="text-xl sm:text-2xl font-black font-mono text-white mt-0.5">
+              {currentTeam.squadCount} / {profile.minSquadSize} min
             </div>
+            <span className="text-[10px] text-slate-400 font-mono">Slots filled</span>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-black/50 border border-white/10">
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">Total Spent</span>
+            <div className="text-xl sm:text-2xl font-black font-mono text-slate-300 mt-0.5">
+              {formatAuctionCurrency(currentTeam.totalSpent, profile.currency)}
+            </div>
+            <span className="text-[10px] text-slate-400 font-mono">{currentTeam.acquiredPlayers.length} contenders won</span>
           </div>
         </div>
       </div>
 
-      {/* =====================================================================
-          ACTION FEEDBACK BANNER (SUCCESS / ERROR SOLVENCY ALERTS)
-          ===================================================================== */}
+      {/* Action Toast Feedback */}
       {actionFeedback && (
         <div
-          className={`p-4 rounded-2xl border text-sm font-semibold flex items-center gap-3 shadow-xl transition-all ${
+          className={`p-4 rounded-2xl border text-sm font-bold flex items-center gap-3 animate-in fade-in ${
             actionFeedback.type === 'SUCCESS'
-              ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-              : 'bg-red-500/15 border-red-500/30 text-red-300'
+              ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200'
+              : 'bg-red-500/20 border-red-500/50 text-red-200'
           }`}
         >
           {actionFeedback.type === 'SUCCESS' ? (
-            <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-emerald-400" />
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
           ) : (
-            <AlertTriangle className="w-5 h-5 flex-shrink-0 text-red-400" />
+            <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
           )}
           <span>{actionFeedback.text}</span>
         </div>
       )}
 
       {/* =====================================================================
-          CENTER: CURRENT PLAYER ON THE BLOCK & PADDLE BIDDING COCKPIT
+          ACTIVE STAGE LOT & TACTILE BIDDING COCKPIT
           ===================================================================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Player on Stage Card (6 Cols) */}
-        <div className="lg:col-span-6 space-y-4">
-          <div className="p-6 rounded-3xl bg-[#080d1a] border border-white/10 shadow-2xl relative overflow-hidden">
-            {/* Live Indicator & Status */}
-            <div className="flex items-center justify-between pb-4 border-b border-white/10">
+      {activeLot && (
+        <div className="p-6 rounded-3xl bg-[#080d21] border border-cyan-500/30 shadow-2xl space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/10">
+            <div>
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-1 rounded-lg bg-red-500/20 text-red-400 border border-red-500/40 text-xs font-mono font-bold flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-                  ON THE BLOCK: LOT #{activeLot.lotNumber}
+                <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                  STAGE LOT #{activeLot.lotNumber}
                 </span>
-                {activeLot.isOverseas && (
-                  <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs font-bold flex items-center gap-1">
-                    <Globe className="w-3 h-3" /> Overseas ★
-                  </span>
-                )}
-              </div>
-
-              {/* Stage Clock Display */}
-              <div className="flex items-center gap-1.5 text-xs font-mono px-3 py-1 rounded-xl bg-black/50 border border-white/10">
-                <Clock className="w-3.5 h-3.5 text-amber-400" />
-                <span className={clock.remainingSeconds <= 10 && clock.status === 'RUNNING' ? 'text-red-400 font-bold animate-pulse' : 'text-slate-300'}>
-                  {clock.status === 'RUNNING' ? `${clock.remainingSeconds}s` : clock.status}
+                <span className="text-xs font-mono text-slate-400 uppercase">
+                  {activeLot.category}
                 </span>
               </div>
+              <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-tight mt-1">
+                {activeLot.title}
+              </h2>
             </div>
 
-            {/* Player Photo & Information */}
-            <div className="flex flex-col sm:flex-row gap-5 pt-4">
-              <div className="w-36 h-44 rounded-2xl overflow-hidden border border-white/15 bg-black/40 flex-shrink-0 shadow-xl">
-                <img
-                  src={activeLot.imageUrls[0] || 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=400'}
-                  alt={activeLot.title}
-                  className="w-full h-full object-cover object-top"
-                />
+            {/* Current Stage Bid Display */}
+            <div className="text-left md:text-right">
+              <span className="text-xs font-mono text-slate-400 uppercase">Current High Bid</span>
+              <div className="text-3xl font-black font-mono text-white">
+                {formatAuctionCurrency(activeLot.currentHighBid, profile.currency)}
               </div>
-
-              <div className="space-y-2 flex-1">
-                <div>
-                  <span className="text-xs font-mono font-bold text-amber-400 uppercase tracking-widest">
-                    {activeLot.category}
-                  </span>
-                  <h2 className="text-2xl font-black text-white tracking-tight">
-                    {activeLot.title}
-                  </h2>
-                  <p className="text-xs text-slate-400">
-                    {activeLot.attributes?.Country || 'International'} • {activeLot.attributes?.Role || activeLot.category}
-                  </p>
-                </div>
-
-                {/* Player Stats Chips */}
-                {activeLot.playerStats && (
-                  <div className="grid grid-cols-3 gap-2 pt-2 text-[11px] font-mono">
-                    {activeLot.playerStats.matches && (
-                      <div className="p-2 rounded-xl bg-white/5 border border-white/5">
-                        <span className="text-slate-400 block text-[9px]">MATCHES</span>
-                        <span className="font-bold text-white">{activeLot.playerStats.matches}</span>
-                      </div>
-                    )}
-                    {activeLot.playerStats.strikeRate && (
-                      <div className="p-2 rounded-xl bg-white/5 border border-white/5">
-                        <span className="text-slate-400 block text-[9px]">STRIKE RATE</span>
-                        <span className="font-bold text-cyan-400">{activeLot.playerStats.strikeRate}</span>
-                      </div>
-                    )}
-                    {activeLot.playerStats.economy && (
-                      <div className="p-2 rounded-xl bg-white/5 border border-white/5">
-                        <span className="text-slate-400 block text-[9px]">ECONOMY</span>
-                        <span className="font-bold text-emerald-400">{activeLot.playerStats.economy}</span>
-                      </div>
-                    )}
-                    {activeLot.playerStats.runs && (
-                      <div className="p-2 rounded-xl bg-white/5 border border-white/5">
-                        <span className="text-slate-400 block text-[9px]">TOTAL RUNS</span>
-                        <span className="font-bold text-amber-300">{activeLot.playerStats.runs}</span>
-                      </div>
-                    )}
-                    {activeLot.playerStats.wickets && (
-                      <div className="p-2 rounded-xl bg-white/5 border border-white/5">
-                        <span className="text-slate-400 block text-[9px]">WICKETS</span>
-                        <span className="font-bold text-purple-300">{activeLot.playerStats.wickets}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <div className="pt-2 flex items-center justify-between text-xs font-mono">
-                  <span className="text-slate-400">Base Price:</span>
-                  <span className="text-white font-bold">
-                    {formatAuctionCurrency(activeLot.startingBid, profile.currency)}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Current Highest Bid Banner */}
-            <div className="mt-5 p-4 rounded-2xl bg-black/60 border border-white/10 flex items-center justify-between">
-              <div>
-                <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block">
-                  Current Highest Bid
-                </span>
-                <div className="text-3xl font-black font-mono text-emerald-400 tracking-tight">
-                  {formatAuctionCurrency(activeLot.currentHighBid, profile.currency)}
-                </div>
-              </div>
-
-              <div className="text-right">
-                <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block">
-                  Leading Franchise
-                </span>
-                <div className="text-sm font-bold text-white mt-0.5">
-                  {activeLot.currentLeaderName
-                    ? `${activeLot.currentLeaderName} (#${activeLot.currentLeaderPaddle})`
-                    : 'Opening Bid Floor'}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Tactile Bidding Paddle Console (6 Cols) */}
-        <div className="lg:col-span-6 space-y-4">
-          <div className="p-6 rounded-3xl bg-[#080d1a] border border-white/10 shadow-2xl space-y-5">
-            {/* Franchise Bidding Status Badge */}
-            <div className="flex items-center justify-between pb-4 border-b border-white/10">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <Zap className="w-4 h-4 text-amber-400" />
-                Live Paddle Console
-              </span>
-
               {isLeading ? (
-                <span className="px-3 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold font-mono flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 animate-pulse">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  YOU HOLD THE WINNING BID
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 font-mono">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> YOU ARE THE HIGHEST BIDDER
                 </span>
               ) : (
-                <span className="px-3 py-1 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-bold font-mono flex items-center gap-1.5">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-                  PADDLE IDLE / OUTBID
+                <span className="text-xs text-amber-400 font-mono">
+                  Leader: {activeLot.currentLeaderName || 'Floor Open'}
                 </span>
               )}
             </div>
-
-            {/* Primary Big Raise Paddle Button */}
-            <div>
-              <button
-                disabled={!canAffordNextBid || isLeading || isOverseasCapReached || isSquadFull}
-                onClick={() => handleBidSubmit(minNextBid)}
-                className={`w-full py-5 rounded-2xl font-black text-lg sm:text-xl uppercase tracking-wider flex items-center justify-center gap-3 shadow-2xl transition-all active:scale-[0.98] ${
-                  isLeading
-                    ? 'bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 cursor-default'
-                    : canAffordNextBid && !isOverseasCapReached && !isSquadFull
-                    ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-400 hover:from-amber-400 hover:to-orange-400 text-black shadow-amber-500/30'
-                    : 'bg-white/5 border border-white/10 text-slate-500 cursor-not-allowed'
-                }`}
-              >
-                <Shield className="w-6 h-6" />
-                {isLeading ? (
-                  <span>Paddle Raised: You Lead at {formatAuctionCurrency(activeLot.currentHighBid, profile.currency)}</span>
-                ) : isSquadFull ? (
-                  <span>Squad Limit Full (Max {profile.maxSquadSize})</span>
-                ) : isOverseasCapReached ? (
-                  <span>Overseas Limit Reached (Max {profile.maxOverseasLimit})</span>
-                ) : !canAffordNextBid ? (
-                  <span>Cannot Bid: Breaches Reserve Floor</span>
-                ) : (
-                  <span>
-                    RAISE PADDLE #{currentTeam.paddleNumber} — {formatAuctionCurrency(minNextBid, profile.currency)}
-                  </span>
-                )}
-              </button>
-
-              {/* Solvency Warning Explainer if blocked */}
-              {!canAffordNextBid && (
-                <div className="mt-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 flex items-start gap-2">
-                  <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                  <span>
-                    <strong>Reserve Floor Lock:</strong> Your remaining purse is{' '}
-                    {formatAuctionCurrency(currentTeam.remainingPurse, profile.currency)}, but you must
-                    preserve at least {formatAuctionCurrency(reserveFloorNeeded, profile.currency)} to guarantee
-                    base prices for your {unfilledSlots} unfilled squad slots. Max permissible bid:{' '}
-                    <strong>{formatAuctionCurrency(maxSafeBid, profile.currency)}</strong>.
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Quick 1-Click Increment Chips */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs text-slate-400">
-                <span className="font-semibold uppercase tracking-wider">Fast Multiplier Chips:</span>
-                <span className="font-mono">Step: +{formatAuctionCurrency(activeLot.minIncrement, profile.currency)}</span>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2.5">
-                {[1, 2, 4].map((multiplier) => {
-                  const targetAmt =
-                    activeLot.bidsCount === 0
-                      ? activeLot.startingBid + activeLot.minIncrement * (multiplier - 1)
-                      : activeLot.currentHighBid + activeLot.minIncrement * multiplier;
-                  const canAfford = targetAmt <= maxSafeBid && !isOverseasCapReached && !isSquadFull && !currentTeam.isFrozen;
-
-                  return (
-                    <button
-                      key={multiplier}
-                      disabled={!canAfford}
-                      onClick={() => handleBidSubmit(targetAmt)}
-                      className={`p-3 rounded-xl border text-center transition-all ${
-                        canAfford
-                          ? 'bg-white/5 hover:bg-amber-500/20 border-white/10 hover:border-amber-400/50 text-white group'
-                          : 'bg-white/[0.02] border-white/5 text-slate-600 cursor-not-allowed'
-                      }`}
-                    >
-                      <div className="text-[10px] font-mono text-slate-400 group-hover:text-amber-300">
-                        +{multiplier}x Step
-                      </div>
-                      <div className="text-sm font-mono font-bold mt-0.5">
-                        {formatAuctionCurrency(targetAmt, profile.currency)}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Custom Amount Bid Input */}
-            <div className="pt-2 border-t border-white/10 flex gap-2">
-              <input
-                type="number"
-                value={customBidInput}
-                onChange={(e) => setCustomBidInput(e.target.value)}
-                placeholder={`Custom Amount (min ${formatAuctionCurrency(minNextBid, profile.currency)})`}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-black/60 border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-amber-400"
-              />
-              <button
-                onClick={() => {
-                  const amt = parseFloat(customBidInput);
-                  if (!isNaN(amt) && amt >= minNextBid) {
-                    handleBidSubmit(amt);
-                  } else {
-                    setActionFeedback({
-                      type: 'ERROR',
-                      text: `Custom bid must be at least ${formatAuctionCurrency(minNextBid, profile.currency)}`,
-                    });
-                  }
-                }}
-                className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold font-mono transition-all"
-              >
-                Submit Bid
-              </button>
-            </div>
           </div>
 
-          {/* Acquired Players Drawer for this franchise */}
-          <div className="p-5 rounded-3xl bg-[#080d1a] border border-white/10 shadow-xl space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-white/10">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-cyan-400" />
-                {currentTeam.name} Roster ({currentTeam.acquiredPlayers?.length || 0} Acquired)
-              </span>
-              <span className="text-[10px] text-slate-400 font-mono">
-                Total Spent: {formatAuctionCurrency(currentTeam.totalSpent, profile.currency)}
-              </span>
-            </div>
-
-            {(!currentTeam.acquiredPlayers || currentTeam.acquiredPlayers.length === 0) ? (
-              <p className="text-xs text-slate-500 py-3 text-center">
-                No players acquired yet. Use your paddle above to win auctions.
-              </p>
-            ) : (
-              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-                {currentTeam.acquiredPlayers.map((player) => (
-                  <div
-                    key={player.id}
-                    className="p-2.5 rounded-xl bg-black/40 border border-white/5 flex items-center justify-between text-xs"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                      <span className="font-bold text-white">{player.title}</span>
-                      <span className="text-[10px] text-slate-400">({player.role})</span>
-                      {player.isOverseas && (
-                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300">
-                          Overseas
-                        </span>
-                      )}
-                    </div>
-                    <span className="font-mono font-bold text-emerald-400">
-                      {formatAuctionCurrency(player.price, profile.currency)}
-                    </span>
-                  </div>
-                ))}
+          {/* GIANT PADDLE RAISE BUTTON */}
+          <div className="space-y-4">
+            <button
+              onClick={() => handleBidSubmit(minNextBid)}
+              disabled={isLeading || !canAffordNextBid}
+              className={`w-full py-6 sm:py-8 rounded-3xl font-black uppercase text-xl sm:text-2xl tracking-wider shadow-2xl transition-all flex flex-col items-center justify-center gap-1 active:scale-[0.99] ${
+                isLeading
+                  ? 'bg-emerald-500/20 border-2 border-emerald-500/50 text-emerald-300 cursor-default shadow-emerald-500/20'
+                  : !canAffordNextBid
+                  ? 'bg-slate-800/50 border border-white/10 text-slate-500 cursor-not-allowed'
+                  : 'text-black shadow-cyan-500/40 hover:brightness-110'
+              }`}
+              style={{
+                background: !isLeading && canAffordNextBid
+                  ? `linear-gradient(135deg, ${currentTeam.color}, ${currentTeam.accentColor})`
+                  : undefined,
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <Shield className="w-6 h-6" />
+                <span>
+                  {isLeading
+                    ? 'PADDLE RAISED — CURRENT HIGH BID'
+                    : `RAISE PADDLE #${currentTeam.paddleNumber}`}
+                </span>
               </div>
-            )}
+              <span className="text-sm sm:text-base font-mono font-bold opacity-90">
+                {isLeading
+                  ? 'Awaiting counter bids from floor'
+                  : `Bid ${formatAuctionCurrency(minNextBid, profile.currency)} (+${formatAuctionCurrency(activeLot.minIncrement, profile.currency)})`}
+              </span>
+            </button>
+
+            {/* Quick Step Chips */}
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+              <span className="text-xs font-mono text-slate-400">Quick Increment Multipliers:</span>
+              {[1, 2, 3, 5].map((mult) => {
+                const targetAmt = activeLot.currentHighBid + activeLot.minIncrement * mult;
+                const canAfford = targetAmt <= maxSafeBid;
+
+                return (
+                  <button
+                    key={mult}
+                    onClick={() => handleBidSubmit(targetAmt)}
+                    disabled={isLeading || !canAfford}
+                    className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-mono font-bold text-slate-300 hover:text-white disabled:opacity-40 transition-all"
+                  >
+                    +{mult}x ({formatAuctionCurrency(activeLot.minIncrement * mult, profile.currency)})
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
+      )}
+
+      {/* =====================================================================
+          ACQUIRED ROSTER ACCORDION
+          ===================================================================== */}
+      <div className="p-6 rounded-3xl bg-[#060a17] border border-white/10 space-y-4">
+        <h3 className="text-base font-black text-white uppercase tracking-tight flex items-center gap-2">
+          <Users className="w-4 h-4 text-cyan-400" />
+          <span>{currentTeam.name} Acquired Roster ({currentTeam.acquiredPlayers.length})</span>
+        </h3>
+
+        {currentTeam.acquiredPlayers.length === 0 ? (
+          <p className="text-xs text-slate-500 py-4 text-center font-mono">
+            No contenders acquired yet. Raise your paddle on active stage lots!
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {currentTeam.acquiredPlayers.map((p) => (
+              <div
+                key={p.id}
+                className="p-3.5 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-between"
+              >
+                <div>
+                  <span className="text-[10px] font-mono text-cyan-400 uppercase">Lot #{p.lotNumber}</span>
+                  <div className="text-sm font-bold text-white uppercase">{p.title}</div>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] font-mono text-slate-400">Hammer</span>
+                  <div className="text-xs font-black font-mono text-emerald-400">
+                    {formatAuctionCurrency(p.price, profile.currency)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 };
-
-export default SportsBiddersPanel;

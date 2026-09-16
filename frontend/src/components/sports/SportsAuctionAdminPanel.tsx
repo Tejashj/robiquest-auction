@@ -3,9 +3,12 @@
 /**
  * ============================================================================
  * SPORTS AUCTION ADMIN PANEL (THE LIVE AUCTIONEER DESK)
- * Designed for the Official Tournament Auctioneer (Hammer Official)
- * Stage Player Selection, Synchronized Countdown Clock, Gavel Hammer Strikes,
- * Disputed Bid Revocations, Floor Paddle Bids, and Cryptographic Bid Ledger
+ * Secured Authority for Tournament Officials:
+ *  - Protected by Admin Master PIN (e.g. ROBOCELL2026)
+ *  - 🔨 Gavel Authority (Fair Warning, Going Twice, Hammer Sold!, Pass Unsold)
+ *  - ⏱️ Synchronized Stage Clock & Anti-Snipe Controls
+ *  - 📋 Contender CMS Studio: Dynamic Add, Edit, Delete, Import/Export Contenders
+ *  - 🙋 Floor Paddle Entry & Disputed Bid Revocations
  * ============================================================================
  */
 
@@ -26,13 +29,19 @@ import {
   Shield,
   Layers,
   Sparkles,
-  ExternalLink,
+  Lock,
+  Unlock,
+  LogOut,
+  FolderEdit,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import {
   useAuctionEngineStore,
   formatAuctionCurrency,
 } from '../../store/auction-engine-store';
 import { SoldCelebrationOverlay } from '../spectator/SoldCelebrationOverlay';
+import { ContenderManagerModal } from '../admin/ContenderManagerModal';
 
 export const SportsAuctionAdminPanel: React.FC = () => {
   const {
@@ -42,8 +51,9 @@ export const SportsAuctionAdminPanel: React.FC = () => {
     teams,
     bids,
     clock,
-    activeBidderTeamId,
-    setActiveBidderTeam,
+    userRole,
+    authenticateAsAdmin,
+    logoutRole,
     setActiveLot,
     placeUserBid,
     revokeLastBid,
@@ -55,14 +65,108 @@ export const SportsAuctionAdminPanel: React.FC = () => {
   } = useAuctionEngineStore();
 
   const [toast, setToast] = useState<{ type: 'SUCCESS' | 'ERROR'; text: string } | null>(null);
+  const [isContenderModalOpen, setIsContenderModalOpen] = useState(false);
+
+  // Inline Admin PIN state
+  const [adminPinInput, setAdminPinInput] = useState('');
+  const [showPin, setShowPin] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const activeLot = lots.find((l) => l.id === activeLotId) || lots[0];
 
+  // --------------------------------------------------------------------------
+  // ROLE GATE: IF NOT AUTHENTICATED AS ADMIN, SHOW LOCK SCREEN
+  // --------------------------------------------------------------------------
+  if (userRole !== 'ADMIN') {
+    const handleLogin = (e: React.FormEvent) => {
+      e.preventDefault();
+      setLoginError(null);
+      if (!adminPinInput.trim()) {
+        setLoginError('Please enter the Auctioneer PIN');
+        return;
+      }
+      const ok = authenticateAsAdmin(adminPinInput.trim());
+      if (ok) {
+        setAdminPinInput('');
+      } else {
+        setLoginError('Invalid Auctioneer Master PIN. Default: ROBOCELL2026');
+      }
+    };
+
+    return (
+      <div className="max-w-lg mx-auto p-6 sm:p-8 my-10 rounded-3xl bg-[#060a17] border border-amber-500/40 shadow-2xl shadow-amber-500/20 text-slate-100 text-center animate-in fade-in">
+        <div className="w-16 h-16 mx-auto rounded-3xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-4 shadow-lg shadow-amber-500/20">
+          <Gavel className="w-8 h-8 transform -rotate-12" />
+        </div>
+
+        <span className="text-xs font-mono font-bold text-amber-400 uppercase tracking-widest">
+          ROBICELL TOURNAMENT OFFICIALS ONLY
+        </span>
+        <h2 className="text-2xl font-black text-white uppercase tracking-tight mt-1 mb-2">
+          Auctioneer Console Locked
+        </h2>
+        <p className="text-xs text-slate-400 max-w-sm mx-auto mb-6">
+          This console holds hammer authority, clock synchronization, and lot catalog management. Enter the official passcode to proceed.
+        </p>
+
+        {loginError && (
+          <div className="mb-4 p-3 rounded-xl bg-red-500/20 border border-red-500/40 text-red-200 text-xs flex items-center justify-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-red-400" />
+            <span>{loginError}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleLogin} className="space-y-4 text-left">
+          <div>
+            <label className="block text-xs font-mono font-bold text-slate-300 uppercase mb-2 flex items-center justify-between">
+              <span>Master Passcode:</span>
+              <button
+                type="button"
+                onClick={() => setAdminPinInput('ROBOCELL2026')}
+                className="text-amber-400 text-[10px] hover:underline"
+              >
+                Auto-Fill (ROBOCELL2026)
+              </button>
+            </label>
+            <div className="relative">
+              <input
+                type={showPin ? 'text' : 'password'}
+                value={adminPinInput}
+                onChange={(e) => setAdminPinInput(e.target.value)}
+                placeholder="ROBOCELL2026"
+                className="w-full px-4 py-3 rounded-2xl bg-black/60 border border-white/20 text-white font-mono text-sm tracking-widest focus:outline-none focus:border-amber-400"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPin(!showPin)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+              >
+                {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-black font-black uppercase text-sm tracking-wider shadow-lg shadow-amber-500/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+          >
+            <Unlock className="w-4 h-4" />
+            <span>Unlock Official Desk</span>
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // AUTHENTICATED AUCTIONEER DESK
+  // --------------------------------------------------------------------------
   const handleFloorBid = (teamId: string) => {
     if (!activeLot) return;
-    const nextAmount = activeLot.bidsCount === 0
-      ? activeLot.startingBid
-      : activeLot.currentHighBid + activeLot.minIncrement;
+    const nextAmount =
+      activeLot.bidsCount === 0
+        ? activeLot.startingBid
+        : activeLot.currentHighBid + activeLot.minIncrement;
     const res = placeUserBid(nextAmount, teamId);
     if (res.success) {
       setToast({ type: 'SUCCESS', text: res.message });
@@ -82,23 +186,21 @@ export const SportsAuctionAdminPanel: React.FC = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  if (!activeLot) {
-    return (
-      <div className="max-w-4xl mx-auto p-12 text-center text-slate-400">
-        <p>No catalog lots available. Use the hidden software admin to import lots.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6 animate-in fade-in duration-200">
       {/* Celebration Modal Overlay */}
       <SoldCelebrationOverlay />
 
+      {/* Dynamic Contender CMS Studio Modal */}
+      <ContenderManagerModal
+        isOpen={isContenderModalOpen}
+        onClose={() => setIsContenderModalOpen(false)}
+      />
+
       {/* =====================================================================
           AUCTIONEER DESK HEADER
           ===================================================================== */}
-      <div className="p-5 sm:p-6 rounded-3xl bg-[#080d1a] border border-white/10 shadow-2xl flex flex-wrap items-center justify-between gap-4">
+      <div className="p-5 sm:p-6 rounded-3xl bg-[#080d1a] border border-amber-500/30 shadow-2xl flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-red-600 flex items-center justify-center shadow-lg shadow-amber-500/25 border border-amber-400/30">
             <Gavel className="w-6 h-6 text-black transform -rotate-12" />
@@ -108,9 +210,11 @@ export const SportsAuctionAdminPanel: React.FC = () => {
               <span className="text-xs font-mono uppercase tracking-widest text-cyan-400 font-bold">
                 ROBICELL AUCTIONEER CONSOLE
               </span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/10 text-slate-300">
-                LOT #{activeLot.lotNumber} ACTIVE
-              </span>
+              {activeLot && (
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/10 text-slate-300">
+                  LOT #{activeLot.lotNumber} ACTIVE
+                </span>
+              )}
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight uppercase">
               RobiQuest Stage & Gavel Authority
@@ -118,301 +222,288 @@ export const SportsAuctionAdminPanel: React.FC = () => {
           </div>
         </div>
 
-        {/* Quick Player Stage Selector */}
-        <div className="flex items-center gap-3">
-          <label className="text-xs font-mono text-slate-400">Put on Stage:</label>
-          <select
-            value={activeLot.id}
-            onChange={(e) => setActiveLot(e.target.value)}
-            className="px-3.5 py-2 rounded-xl bg-black/60 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-amber-400"
+        {/* Action Controls: Contender CMS Studio + Put on Stage + Lock */}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setIsContenderModalOpen(true)}
+            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-extrabold text-xs flex items-center gap-1.5 shadow-md shadow-cyan-500/25 transition-all"
           >
-            {lots.map((l) => (
-              <option key={l.id} value={l.id}>
-                Lot #{l.lotNumber}: {l.title} ({l.status})
-              </option>
-            ))}
-          </select>
+            <FolderEdit className="w-3.5 h-3.5" />
+            <span>Manage Contenders ({lots.length})</span>
+          </button>
+
+          {activeLot && (
+            <div className="flex items-center gap-2">
+              <select
+                value={activeLot.id}
+                onChange={(e) => setActiveLot(e.target.value)}
+                className="px-3 py-2 rounded-xl bg-black/60 border border-white/15 text-white font-mono text-xs focus:outline-none focus:border-amber-400 max-w-[200px] truncate"
+              >
+                {lots.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    #{l.lotNumber}: {l.title} ({l.status})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <button
+            onClick={logoutRole}
+            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 hover:text-white transition-all"
+            title="Lock Auctioneer Console"
+          >
+            <LogOut className="w-4 h-4 text-rose-400" />
+          </button>
         </div>
       </div>
 
       {/* Toast Feedback */}
       {toast && (
         <div
-          className={`p-3.5 rounded-2xl border text-xs font-bold flex items-center gap-2 shadow-xl ${
+          className={`p-3.5 rounded-2xl border text-xs font-bold flex items-center gap-2.5 animate-in fade-in ${
             toast.type === 'SUCCESS'
-              ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-              : 'bg-red-500/15 border-red-500/30 text-red-300'
+              ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-200'
+              : 'bg-red-500/20 border-red-500/40 text-red-200'
           }`}
         >
-          {toast.type === 'SUCCESS' ? <CheckCircle2 className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
+          {toast.type === 'SUCCESS' ? (
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+          ) : (
+            <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
+          )}
           <span>{toast.text}</span>
         </div>
       )}
 
-      {/* =====================================================================
-          MAIN OPERATIONAL ARENA: STAGE CONTROLS + FLOOR PADDLES
-          ===================================================================== */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left 7 Cols: Active Lot Hero, Timer, Gavel Strikes */}
-        <div className="lg:col-span-7 space-y-5">
-          {/* Active Player Card */}
-          <div className="p-6 rounded-3xl bg-[#080d1a] border border-white/10 shadow-2xl relative overflow-hidden">
-            <div className="flex flex-col sm:flex-row gap-5">
-              <div className="w-36 h-44 rounded-2xl overflow-hidden border border-white/15 bg-black/50 flex-shrink-0">
-                <img
-                  src={activeLot.imageUrls[0] || 'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=400'}
-                  alt={activeLot.title}
-                  className="w-full h-full object-cover object-top"
-                />
-              </div>
-
-              <div className="space-y-2 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono font-bold">
-                    {activeLot.category}
+      {/* If no lots are loaded */}
+      {!activeLot ? (
+        <div className="p-12 text-center text-slate-500 rounded-3xl bg-[#060914] border border-white/10 space-y-3">
+          <p className="text-base font-bold text-white">No Contenders in Catalog</p>
+          <button
+            onClick={() => setIsContenderModalOpen(true)}
+            className="px-4 py-2 rounded-xl bg-cyan-500 text-black font-extrabold text-xs"
+          >
+            Open Contender Studio & Add Lots
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* =====================================================================
+              PRIMARY OPERATIONAL ROW: ACTIVE LOT CARD + 4-TEAM PADDLE ENTRY
+              ===================================================================== */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Active Stage Lot Overview (7 cols) */}
+            <div className="lg:col-span-7 p-6 rounded-3xl bg-[#080d1e] border border-white/10 shadow-2xl flex flex-col justify-between gap-6">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div className="w-24 h-24 rounded-2xl overflow-hidden bg-black/60 border border-white/15 flex-shrink-0 relative">
+                  <img
+                    src={activeLot.imageUrls[0]}
+                    alt={activeLot.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <span className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded bg-black/80 font-mono text-xs font-bold text-amber-300">
+                    #{activeLot.lotNumber}
                   </span>
-                  {activeLot.isOverseas && (
-                    <span className="px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs font-bold">
-                      Overseas ★
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                      {activeLot.category}
                     </span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white/10 text-slate-300 uppercase">
+                      {activeLot.status}
+                    </span>
+                  </div>
+                  <h2 className="text-xl font-black text-white uppercase tracking-tight">
+                    {activeLot.title}
+                  </h2>
+                  <div className="text-xs text-slate-400 font-mono flex items-center gap-4 pt-1">
+                    <span>Base: <strong className="text-white">{formatAuctionCurrency(activeLot.startingBid, profile.currency)}</strong></span>
+                    <span>Increment: <strong className="text-cyan-300">+{formatAuctionCurrency(activeLot.minIncrement, profile.currency)}</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Current High Bid Hero Banner */}
+              <div className="p-5 rounded-2xl bg-black/50 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <span className="text-[10px] font-mono uppercase text-slate-400">Current Highest Bid</span>
+                  <div className="text-3xl sm:text-4xl font-black font-mono text-white">
+                    {formatAuctionCurrency(activeLot.currentHighBid, profile.currency)}
+                  </div>
+                </div>
+
+                <div className="text-left sm:text-right">
+                  <span className="text-[10px] font-mono uppercase text-slate-400">Current Leader</span>
+                  <div className="text-lg font-black text-cyan-300 uppercase truncate">
+                    {activeLot.currentLeaderName || 'No Floor Bids Yet'}
+                  </div>
+                  {activeLot.currentLeaderPaddle && (
+                    <span className="text-xs font-mono text-slate-400">Paddle #{activeLot.currentLeaderPaddle}</span>
                   )}
-                  <span className={`px-2 py-0.5 rounded-md text-xs font-mono font-bold ${
-                    activeLot.status === 'SOLD' ? 'bg-emerald-500/20 text-emerald-400' :
-                    activeLot.status === 'PASSED' ? 'bg-red-500/20 text-red-400' :
-                    'bg-white/10 text-white'
-                  }`}>
-                    {activeLot.status}
-                  </span>
-                </div>
-
-                <h2 className="text-2xl font-black text-white">{activeLot.title}</h2>
-                <p className="text-xs text-slate-400">{activeLot.attributes?.Country || 'International'} • {activeLot.attributes?.Discipline || activeLot.category}</p>
-
-                <div className="pt-2 grid grid-cols-2 gap-3 text-xs font-mono">
-                  <div className="p-2 rounded-xl bg-black/40 border border-white/5">
-                    <span className="text-slate-400 block text-[10px]">BASE PRICE</span>
-                    <span className="text-white font-bold">{formatAuctionCurrency(activeLot.startingBid, profile.currency)}</span>
-                  </div>
-                  <div className="p-2 rounded-xl bg-black/40 border border-white/5">
-                    <span className="text-slate-400 block text-[10px]">MIN INCREMENT</span>
-                    <span className="text-amber-300 font-bold">+{formatAuctionCurrency(activeLot.minIncrement, profile.currency)}</span>
-                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Current Leader / High Bid */}
-            <div className="mt-5 p-4 rounded-2xl bg-black/60 border border-white/10 flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-mono uppercase text-slate-400 block">Current High Bid</span>
-                <div className="text-3xl font-black font-mono text-emerald-400">
-                  {formatAuctionCurrency(activeLot.currentHighBid, profile.currency)}
-                </div>
+            {/* Quick 4-Team Floor Paddle Triggers (5 cols) */}
+            <div className="lg:col-span-5 p-6 rounded-3xl bg-[#080d1e] border border-white/10 shadow-2xl space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-white/10">
+                <span className="text-xs font-mono font-bold text-slate-300 uppercase flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-cyan-400" />
+                  Floor Paddle Entry (4 Teams)
+                </span>
+                <span className="text-[10px] text-slate-400 font-mono">Click to record bid</span>
               </div>
 
-              <div className="text-right">
-                <span className="text-[10px] font-mono uppercase text-slate-400 block">Current Leader</span>
-                <div className="text-sm font-bold text-white mt-0.5">
-                  {activeLot.currentLeaderName
-                    ? `${activeLot.currentLeaderName} (#${activeLot.currentLeaderPaddle})`
-                    : 'Awaiting Floor Bid'}
-                </div>
+              <div className="grid grid-cols-1 gap-2.5">
+                {teams.map((t) => {
+                  const isLeader = activeLot.currentLeaderId === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => handleFloorBid(t.id)}
+                      disabled={isLeader}
+                      className={`p-3 rounded-2xl border text-left transition-all flex items-center justify-between ${
+                        isLeader
+                          ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300 shadow-md'
+                          : 'bg-black/40 border-white/10 hover:border-white/20 hover:bg-white/5 active:scale-[0.99]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: t.color }} />
+                        <div>
+                          <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                            <span>{t.name}</span>
+                            <span className="text-[10px] font-mono text-slate-400">#{t.paddleNumber}</span>
+                          </div>
+                          <div className="text-[10px] font-mono text-slate-400">
+                            Purse: {formatAuctionCurrency(t.remainingPurse, profile.currency)}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        {isLeader ? (
+                          <span className="text-xs font-bold text-emerald-400 font-mono flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" /> LEADER
+                          </span>
+                        ) : (
+                          <span className="text-xs font-mono font-bold text-cyan-400">
+                            Raise Next
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
 
-          {/* Synchronized Stage Countdown Clock Controls */}
-          <div className="p-5 rounded-3xl bg-[#080d1a] border border-white/10 shadow-xl space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-cyan-400" />
-                Stage Clock Synchronization
-              </span>
-              <span className={`px-2.5 py-1 rounded-xl text-xs font-mono font-bold ${
-                clock.status === 'RUNNING' ? 'bg-emerald-500/20 text-emerald-400 animate-pulse' :
-                clock.status === 'PAUSED' ? 'bg-amber-500/20 text-amber-400' :
-                'bg-white/10 text-slate-400'
-              }`}>
-                {clock.status}: {clock.remainingSeconds}s
-              </span>
-            </div>
+          {/* =====================================================================
+              SECONDARY OPERATIONAL ROW: STAGE CLOCK + GAVEL HAMMER CALLS
+              ===================================================================== */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Stage Clock Controls (5 cols) */}
+            <div className="lg:col-span-5 p-5 rounded-3xl bg-[#080d1a] border border-white/10 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono font-bold uppercase text-slate-300 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                  Stage Clock Synchronization
+                </span>
+                <span className="text-xs font-mono px-2 py-0.5 rounded bg-white/10 text-white font-bold">
+                  {clock.status}: {clock.remainingSeconds}s
+                </span>
+              </div>
 
-            <div className="grid grid-cols-4 gap-2">
-              <button
-                onClick={startClock}
-                disabled={clock.status === 'RUNNING'}
-                className="py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-black font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/20"
-              >
-                <Play className="w-3.5 h-3.5" /> Start Clock
-              </button>
-
-              <button
-                onClick={pauseClock}
-                disabled={clock.status !== 'RUNNING'}
-                className="py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold flex items-center justify-center gap-1.5"
-              >
-                <Pause className="w-3.5 h-3.5" /> Pause
-              </button>
-
-              <button
-                onClick={() => extendClock(15)}
-                className="py-2.5 rounded-xl bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold flex items-center justify-center gap-1.5"
-              >
-                <Plus className="w-3.5 h-3.5" /> +15s Anti-Snipe
-              </button>
-
-              <button
-                onClick={() => resetClock(60)}
-                className="py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 text-xs font-bold flex items-center justify-center gap-1.5"
-              >
-                <RotateCcw className="w-3.5 h-3.5" /> Reset (60s)
-              </button>
-            </div>
-          </div>
-
-          {/* Gavel Strikes & Stage Authority */}
-          <div className="p-5 rounded-3xl bg-[#080d1a] border border-white/10 shadow-xl space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <Gavel className="w-4 h-4 text-amber-400" />
-                Hammer Authority & Gavel Calls
-              </span>
-              <button
-                onClick={handleRevoke}
-                className="px-3 py-1 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-bold flex items-center gap-1"
-                title="Revoke and roll back the last accepted bid"
-              >
-                <Undo2 className="w-3.5 h-3.5" /> Revoke Last Bid
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              <button
-                onClick={() => triggerGavelAction('FAIR_WARNING')}
-                className="py-3 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-extrabold transition-all"
-              >
-                Going Once...
-              </button>
-
-              <button
-                onClick={() => triggerGavelAction('GOING_TWICE')}
-                className="py-3 rounded-xl bg-amber-600/20 hover:bg-amber-600/30 border border-amber-500/40 text-amber-200 text-xs font-extrabold transition-all"
-              >
-                Going Twice...
-              </button>
-
-              <button
-                onClick={() => triggerGavelAction('SOLD')}
-                disabled={!activeLot.currentLeaderId || activeLot.status === 'SOLD'}
-                className="py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 disabled:opacity-40 text-black text-xs font-black shadow-lg shadow-emerald-500/30 uppercase tracking-wider transition-all active:scale-95"
-              >
-                HAMMER SOLD! 🔨
-              </button>
-
-              <button
-                onClick={() => triggerGavelAction('PASS_UNSOLD')}
-                className="py-3 rounded-xl bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 text-red-300 text-xs font-bold transition-all"
-              >
-                Pass Unsold
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Right 5 Cols: Floor Paddles Bidding Desk & Ledger */}
-        <div className="lg:col-span-5 space-y-5">
-          {/* Floor Paddles Matrix (Direct Auctioneer Bid Entry) */}
-          <div className="p-5 rounded-3xl bg-[#080d1a] border border-white/10 shadow-xl space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-white/10">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <Users className="w-4 h-4 text-cyan-400" />
-                Floor Paddle Entry ({teams.length} Teams)
-              </span>
-              <span className="text-[10px] font-mono text-slate-400">Click to record bid</span>
-            </div>
-
-            <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-              {teams.map((t) => {
-                const isLeader = activeLot.currentLeaderId === t.id;
-                return (
+              <div className="grid grid-cols-3 gap-2">
+                {clock.status === 'RUNNING' ? (
                   <button
-                    key={t.id}
-                    onClick={() => handleFloorBid(t.id)}
-                    className={`w-full p-2.5 rounded-2xl border text-left transition-all flex items-center justify-between ${
-                      isLeader
-                        ? 'bg-emerald-500/20 border-emerald-400 text-white ring-1 ring-emerald-400/40'
-                        : 'bg-black/40 hover:bg-white/5 border-white/10 text-slate-300'
-                    }`}
+                    onClick={pauseClock}
+                    className="py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
                   >
-                    <div className="flex items-center gap-2.5">
-                      <div
-                        className="w-8 h-8 rounded-lg overflow-hidden border p-0.5 bg-black/60 flex-shrink-0"
-                        style={{ borderColor: t.color }}
-                      >
-                        <img src={t.logoUrl} alt={t.name} className="w-full h-full object-contain" />
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold flex items-center gap-1.5">
-                          <span>{t.shortCode} #{t.paddleNumber}</span>
-                          {isLeader && <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-400 text-black font-extrabold">LEADING</span>}
-                        </div>
-                        <div className="text-[10px] text-slate-400 font-mono">
-                          Purse: {formatAuctionCurrency(t.remainingPurse, profile.currency)}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      <span className="text-[11px] font-mono font-bold text-amber-300 block">
-                        Raise Next
-                      </span>
-                      <span className="text-[10px] text-slate-400">
-                        {t.squadCount}/{profile.maxSquadSize} Slots
-                      </span>
-                    </div>
+                    <Pause className="w-3.5 h-3.5" />
+                    <span>Pause</span>
                   </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Cryptographic Live Bid Audit Ledger */}
-          <div className="p-5 rounded-3xl bg-[#080d1a] border border-white/10 shadow-xl space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-white/10">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <TrendingUp className="w-4 h-4 text-emerald-400" />
-                Live Bid Ledger ({bids.length} Bids)
-              </span>
-              <span className="text-[10px] text-slate-400 font-mono">SHA-256 Verified</span>
-            </div>
-
-            {bids.length === 0 ? (
-              <p className="text-xs text-slate-500 py-6 text-center">Awaiting opening bid from participating floor paddles.</p>
-            ) : (
-              <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
-                {bids.map((b) => (
-                  <div
-                    key={b.id}
-                    className={`p-2.5 rounded-xl border flex items-center justify-between text-xs font-mono ${
-                      b.isRevoked
-                        ? 'bg-red-500/10 border-red-500/20 line-through text-red-400'
-                        : 'bg-black/40 border-white/5 text-slate-300'
-                    }`}
+                ) : (
+                  <button
+                    onClick={startClock}
+                    className="py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
                   >
-                    <div className="flex items-center gap-2">
-                      <span className="text-slate-400">{new Date(b.timestamp).toLocaleTimeString()}</span>
-                      <span className="font-bold text-white">{b.teamName} (#{b.paddleNumber})</span>
-                    </div>
-                    <span className="font-bold text-emerald-400">{formatAuctionCurrency(b.amount, profile.currency)}</span>
-                  </div>
-                ))}
+                    <Play className="w-3.5 h-3.5" />
+                    <span>Start</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={() => extendClock(15)}
+                  className="py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>+15s Anti-Snipe</span>
+                </button>
+
+                <button
+                  onClick={() => resetClock(60)}
+                  className="py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reset (60s)</span>
+                </button>
               </div>
-            )}
+            </div>
+
+            {/* Gavel Hammer Strikes (7 cols) */}
+            <div className="lg:col-span-7 p-5 rounded-3xl bg-[#080d1a] border border-white/10 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono font-bold uppercase text-slate-300 flex items-center gap-1.5">
+                  <Gavel className="w-3.5 h-3.5 text-amber-400" />
+                  Hammer Authority & Gavel Calls
+                </span>
+
+                <button
+                  onClick={handleRevoke}
+                  disabled={bids.length === 0}
+                  className="px-2.5 py-1 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-bold disabled:opacity-40 flex items-center gap-1 transition-all"
+                >
+                  <Undo2 className="w-3 h-3" />
+                  <span>Revoke Last Bid</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <button
+                  onClick={() => triggerGavelAction('FAIR_WARNING')}
+                  className="py-3 px-2 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-black uppercase transition-all"
+                >
+                  Going Once
+                </button>
+                <button
+                  onClick={() => triggerGavelAction('GOING_TWICE')}
+                  className="py-3 px-2 rounded-2xl bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/40 text-orange-300 text-xs font-black uppercase transition-all"
+                >
+                  Going Twice
+                </button>
+                <button
+                  onClick={() => triggerGavelAction('SOLD')}
+                  disabled={!activeLot.currentLeaderId}
+                  className="py-3 px-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black text-xs font-black uppercase shadow-lg shadow-emerald-500/30 disabled:opacity-40 transition-all active:scale-[0.98]"
+                >
+                  🔨 SOLD!
+                </button>
+                <button
+                  onClick={() => triggerGavelAction('PASS_UNSOLD')}
+                  className="py-3 px-2 rounded-2xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-300 text-xs font-black uppercase transition-all"
+                >
+                  Pass Unsold
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 };
-
-export default SportsAuctionAdminPanel;

@@ -3,15 +3,16 @@
 /**
  * ============================================================================
  * UNIFIED ENTERPRISE SPORTS AUCTION PLATFORM SHELL
- * Dedicated 3-Way Public Role Separation:
- *  1. 🔨 Auction Admin (Live Auctioneer Desk)
- *  2. 🙋 Franchise Bidder (Team Owner Bidding Room)
- *  3. 📺 Stadium Projector (4K Broadcast Viewers Panel)
+ * RobiQuest 2026 Live Auction Arena • Conducted by RoboCell
+ * Dedicated Role-Gated Architecture:
+ *  1. 📺 Stadium Projector (4K Spectator Jumbotron - Default Public Mode)
+ *  2. 🔨 Auction Admin (Live Auctioneer Desk - Protected by Admin PIN)
+ *  3. 🙋 Franchise Bidder (Team Bidding Terminal - Protected by Team PIN)
  *
- * SOFTWARE ADMIN IS STRICTLY HIDDEN & UNLISTED:
- *  - Removed from standard navigation bar / menus.
- *  - Accessible only via 'Ctrl + Shift + S' or discreet footer trigger.
- *  - Protected by Master Passkey challenge.
+ * Integrated Features:
+ *  - 🔐 PIN Authentication Gate Modal
+ *  - 📋 Contender & Roster CMS Studio
+ *  - ⚡ Live TV Broadcast Ticker
  * ============================================================================
  */
 
@@ -27,6 +28,10 @@ import {
   ChevronDown,
   Shield,
   Lock,
+  Unlock,
+  KeyRound,
+  LogOut,
+  FolderEdit,
 } from 'lucide-react';
 import {
   useAuctionEngineStore,
@@ -37,27 +42,48 @@ import { SportsAuctionAdminPanel } from '../sports/SportsAuctionAdminPanel';
 import { SportsBiddersPanel } from '../sports/SportsBiddersPanel';
 import { SportsViewersPanel } from '../sports/SportsViewersPanel';
 import { HiddenSoftwareAdminModal } from '../sports/HiddenSoftwareAdminModal';
+import { RoleAuthGateModal } from '../auth/RoleAuthGateModal';
+import { LiveBroadcastTicker } from '../spectator/LiveBroadcastTicker';
+import { ContenderManagerModal } from '../admin/ContenderManagerModal';
 
 type PublicPanelTab = 'AUCTION_ADMIN' | 'FRANCHISE_BIDDER' | 'STADIUM_VIEWER';
 
 export const AuctionApp: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<PublicPanelTab>('AUCTION_ADMIN');
-  const [isTemplateMenuOpen, setIsTemplateMenuOpen] = useState(false);
-  const [isSoftwareAdminModalOpen, setIsSoftwareAdminModalOpen] = useState(false);
-
   const {
     profile,
     lots,
     teams,
     activeLotId,
     isMuted,
+    userRole,
+    authenticatedTeamId,
+    logoutRole,
     toggleMute,
     loadPresetTemplate,
   } = useAuctionEngineStore();
 
-  const activeLot = lots.find((l) => l.id === activeLotId) || lots[0];
+  // Public view defaults to STADIUM_VIEWER for general spectators
+  const [activeTab, setActiveTab] = useState<PublicPanelTab>('STADIUM_VIEWER');
+  const [isTemplateMenuOpen, setIsTemplateMenuOpen] = useState(false);
+  const [isSoftwareAdminModalOpen, setIsSoftwareAdminModalOpen] = useState(false);
 
-  // Global stealth keydown listener: Ctrl + Shift + S / Cmd + Shift + S
+  // Role Auth Gate Modal State
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState<'ADMIN' | 'BIDDER' | 'VIEWER'>('ADMIN');
+
+  // Contender CMS Studio Modal
+  const [isCmsModalOpen, setIsCmsModalOpen] = useState(false);
+
+  // Sync activeTab when userRole changes
+  useEffect(() => {
+    if (userRole === 'ADMIN') {
+      setActiveTab('AUCTION_ADMIN');
+    } else if (userRole === 'BIDDER') {
+      setActiveTab('FRANCHISE_BIDDER');
+    }
+  }, [userRole]);
+
+  // Global stealth keydown listener: Ctrl + Shift + S
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'S' || e.key === 's')) {
@@ -66,7 +92,6 @@ export const AuctionApp: React.FC = () => {
       }
     };
 
-    // Check URL query param ?mode=sys-admin
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('mode') === 'sys-admin') {
@@ -93,24 +118,67 @@ export const AuctionApp: React.FC = () => {
     setIsTemplateMenuOpen(false);
   };
 
+  const handleTabClick = (tab: PublicPanelTab) => {
+    if (tab === 'AUCTION_ADMIN') {
+      if (userRole === 'ADMIN') {
+        setActiveTab('AUCTION_ADMIN');
+      } else {
+        setAuthModalTab('ADMIN');
+        setIsAuthModalOpen(true);
+      }
+    } else if (tab === 'FRANCHISE_BIDDER') {
+      if (userRole === 'BIDDER' && authenticatedTeamId) {
+        setActiveTab('FRANCHISE_BIDDER');
+      } else {
+        setAuthModalTab('BIDDER');
+        setIsAuthModalOpen(true);
+      }
+    } else {
+      setActiveTab('STADIUM_VIEWER');
+    }
+  };
+
+  const authenticatedTeam = teams.find((t) => t.id === authenticatedTeamId);
+
   return (
-    <div className="min-h-screen bg-[#03060f] text-slate-100 flex flex-col selection:bg-amber-500/30 selection:text-amber-200">
+    <div className="min-h-screen bg-[#03060f] text-slate-100 flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200">
+      {/* Role Authentication Gate Modal */}
+      <RoleAuthGateModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        initialTab={authModalTab}
+        onAuthenticated={(role) => {
+          if (role === 'ADMIN') setActiveTab('AUCTION_ADMIN');
+          if (role === 'BIDDER') setActiveTab('FRANCHISE_BIDDER');
+          if (role === 'VIEWER') setActiveTab('STADIUM_VIEWER');
+        }}
+      />
+
+      {/* Contender CMS Studio Modal */}
+      <ContenderManagerModal
+        isOpen={isCmsModalOpen}
+        onClose={() => setIsCmsModalOpen(false)}
+      />
+
+      {/* Hidden Software Admin Modal */}
+      <HiddenSoftwareAdminModal
+        isOpen={isSoftwareAdminModalOpen}
+        onClose={() => setIsSoftwareAdminModalOpen(false)}
+      />
+
       {/* =====================================================================
-          TOP NAVIGATION BAR (PUBLIC / ROLE-BASED HUD)
-          Contains ONLY Auction Admin, Franchise Bidder, and Stadium Projector
-          (Software Admin is strictly omitted from this bar)
+          TOP NAVIGATION BAR (ROLE-GATED BROADCAST HUD)
           ===================================================================== */}
       <header className="sticky top-0 z-40 bg-[#060a17]/95 border-b border-white/10 backdrop-blur-2xl px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3 shadow-2xl">
-        {/* Left: Brand Identity & Tournament Title */}
+        {/* Left: RoboCell Brand Identity */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-black border-2 border-cyan-400/40 p-0.5 shadow-lg shadow-cyan-500/20 overflow-hidden flex items-center justify-center group relative">
+            <div className="w-11 h-11 rounded-2xl bg-black border-2 border-cyan-400/50 p-0.5 shadow-lg shadow-cyan-500/20 overflow-hidden flex items-center justify-center flex-shrink-0">
               <img
-                src="/robocell-logo.png"
+                src="/robocell-crest.png"
                 alt="RoboCell Crest"
-                className="w-full h-full object-contain rounded-xl"
+                className="w-full h-full object-contain"
               />
-              <div className="absolute inset-0 rounded-xl bg-cyan-400/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -135,155 +203,115 @@ export const AuctionApp: React.FC = () => {
               {profile.currency}
             </span>
             <span className="text-slate-400">
-              {lots.length} {lots.length === 1 ? 'Lot' : 'Lots'}
+              {lots.length} Contenders
             </span>
             <span className="text-slate-600">•</span>
             <span className="text-cyan-400 font-bold">
-              {teams.length} Teams
+              {teams.length} Franchises
             </span>
           </div>
         </div>
 
-        {/* Center: 3 Dedicated Role-Specific Panels (ONLY) */}
-        <nav className="hidden md:flex items-center gap-1 p-1 bg-black/40 border border-white/10 rounded-2xl backdrop-blur-md">
-          {/* 1. Auction Admin (Live Auctioneer Desk) */}
+        {/* Center: 3 Role Tabs */}
+        <nav className="hidden md:flex items-center gap-1 p-1 bg-black/50 border border-white/10 rounded-2xl backdrop-blur-md">
+          {/* 1. Stadium Projector (Public Spectator View) */}
           <button
-            onClick={() => setActiveTab('AUCTION_ADMIN')}
-            className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              activeTab === 'AUCTION_ADMIN'
-                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-lg shadow-amber-500/30'
-                : 'text-slate-400 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            <Gavel className="w-3.5 h-3.5" />
-            Auction Admin
-          </button>
-
-          {/* 2. Franchise Bidder Panel (Team Bidding Room) */}
-          <button
-            onClick={() => setActiveTab('FRANCHISE_BIDDER')}
-            className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              activeTab === 'FRANCHISE_BIDDER'
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-black shadow-lg shadow-emerald-500/30'
-                : 'text-slate-400 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            <Users className="w-3.5 h-3.5" />
-            Franchise Bidder
-          </button>
-
-          {/* 3. Stadium Viewers Panel (Projector 4K Feed) */}
-          <button
-            onClick={() => setActiveTab('STADIUM_VIEWER')}
+            onClick={() => handleTabClick('STADIUM_VIEWER')}
             className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'STADIUM_VIEWER'
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-black shadow-lg shadow-cyan-500/30'
+                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-black shadow-lg shadow-cyan-500/30 font-black'
                 : 'text-slate-400 hover:text-white hover:bg-white/5'
             }`}
           >
             <Tv className="w-3.5 h-3.5" />
-            Stadium Projector
+            Stadium Screen
             <span className="px-1.5 py-0.2 rounded bg-cyan-400/20 text-[9px] text-cyan-300 border border-cyan-400/30 font-mono">
               4K
             </span>
           </button>
+
+          {/* 2. Franchise Bidder Panel (Locked to Team PIN) */}
+          <button
+            onClick={() => handleTabClick('FRANCHISE_BIDDER')}
+            className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              activeTab === 'FRANCHISE_BIDDER'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-black shadow-lg shadow-emerald-500/30 font-black'
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            <span>Franchise Cockpit</span>
+            {userRole !== 'BIDDER' && <Lock className="w-3 h-3 text-slate-500" />}
+          </button>
+
+          {/* 3. Auction Admin (Locked to Admin PIN) */}
+          <button
+            onClick={() => handleTabClick('AUCTION_ADMIN')}
+            className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              activeTab === 'AUCTION_ADMIN'
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-lg shadow-amber-500/30 font-black'
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Gavel className="w-3.5 h-3.5" />
+            <span>Auctioneer Desk</span>
+            {userRole !== 'ADMIN' && <Lock className="w-3 h-3 text-slate-500" />}
+          </button>
         </nav>
 
-        {/* Right: Template Blueprints & Controls */}
+        {/* Right: Role Status & Controls */}
         <div className="flex items-center gap-2">
-          {/* Blueprints Dropdown */}
-          <div className="relative">
+          {/* Active Role Indicator */}
+          {userRole === 'ADMIN' ? (
+            <div className="flex items-center gap-1.5">
+              <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-mono font-bold">
+                <Gavel className="w-3.5 h-3.5" />
+                <span>Auctioneer Authority</span>
+              </span>
+              <button
+                onClick={logoutRole}
+                className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-rose-400 hover:text-white transition-all"
+                title="Log Out & Lock Console"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          ) : userRole === 'BIDDER' && authenticatedTeam ? (
+            <div className="flex items-center gap-1.5">
+              <span
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold border"
+                style={{
+                  backgroundColor: `${authenticatedTeam.color}25`,
+                  borderColor: authenticatedTeam.color,
+                  color: '#fff',
+                }}
+              >
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: authenticatedTeam.color }} />
+                <span>{authenticatedTeam.shortCode} #{authenticatedTeam.paddleNumber}</span>
+              </span>
+              <button
+                onClick={logoutRole}
+                className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-rose-400 hover:text-white transition-all"
+                title="Release Franchise Terminal"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
             <button
-              onClick={() => setIsTemplateMenuOpen(!isTemplateMenuOpen)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-300 hover:text-white transition-all shadow-sm"
-              title="Switch Blueprints"
+              onClick={() => {
+                setAuthModalTab('ADMIN');
+                setIsAuthModalOpen(true);
+              }}
+              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition-all active:scale-[0.98]"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span className="hidden sm:inline">Blueprints</span>
-              <ChevronDown className="w-3 h-3 text-slate-400" />
+              <KeyRound className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Official Login</span>
+              <span className="sm:hidden">Login</span>
             </button>
+          )}
 
-            {isTemplateMenuOpen && (
-              <div className="absolute right-0 mt-2 w-72 rounded-2xl bg-[#080d1a] border border-white/20 shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                <div className="px-3 py-2 border-b border-white/10 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Select Blueprint
-                </div>
-
-                <div className="mt-1 space-y-1">
-                  <button
-                    onClick={() => handleSelectTemplate('ROBIQUEST')}
-                    className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-white/10 transition-all flex items-center justify-between group"
-                  >
-                    <div>
-                      <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-cyan-400" />
-                        RobiQuest 2026 (RoboCell)
-                      </div>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        4 Robotics Teams, High-Tech Hardware Lots, Tech-Transform-Thrive
-                      </p>
-                    </div>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono">
-                      INR ₹
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => handleSelectTemplate('SPORTS_IPL')}
-                    className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-white/10 transition-all flex items-center justify-between group"
-                  >
-                    <div>
-                      <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-orange-500" />
-                        IPL Mega Auction 2026
-                      </div>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        ₹120 Cr Cap, Reserve Floor Rules, Squad Quotas
-                      </p>
-                    </div>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 font-mono">
-                      INR ₹
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => handleSelectTemplate('EMPTY')}
-                    className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-white/10 transition-all flex items-center justify-between group"
-                  >
-                    <div>
-                      <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-slate-500" />
-                        Blank Slate (Zero Data)
-                      </div>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        Clean catalog & franchises ready for custom setup
-                      </p>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => handleSelectTemplate('FINE_ART_LUXURY')}
-                    className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-white/10 transition-all flex items-center justify-between group"
-                  >
-                    <div>
-                      <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-cyan-500" />
-                        Fine Art & Modern Masters
-                      </div>
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        High-value galleries, private collector paddles
-                      </p>
-                    </div>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono">
-                      USD $
-                    </span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Sound FX Audio Toggle */}
+          {/* Audio Mute Toggle */}
           <button
             onClick={toggleMute}
             className={`p-2 rounded-xl border transition-all ${
@@ -291,16 +319,16 @@ export const AuctionApp: React.FC = () => {
                 ? 'bg-red-500/10 border-red-500/30 text-red-400'
                 : 'bg-white/5 border-white/10 text-slate-300 hover:text-white hover:bg-white/10'
             }`}
-            title={isMuted ? 'Unmute Live Audio Cues' : 'Mute Live Audio Cues'}
+            title={isMuted ? 'Unmute Audio Cues' : 'Mute Audio Cues'}
           >
             {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
           </button>
 
-          {/* Fullscreen Button */}
+          {/* Fullscreen Toggle */}
           <button
             onClick={toggleFullScreen}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all"
-            title="Toggle Fullscreen"
+            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-all hidden sm:flex"
+            title="Toggle Fullscreen Arena"
           >
             <Maximize2 className="w-4 h-4" />
           </button>
@@ -308,74 +336,53 @@ export const AuctionApp: React.FC = () => {
       </header>
 
       {/* =====================================================================
-          MOBILE SUB-HEADER TAB NAVIGATION
+          MAIN ROLE VIEW CONTAINER
           ===================================================================== */}
-      <div className="md:hidden flex items-center justify-between px-3 py-2 bg-[#060a17] border-b border-white/10 overflow-x-auto gap-2">
-        <button
-          onClick={() => setActiveTab('AUCTION_ADMIN')}
-          className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold ${
-            activeTab === 'AUCTION_ADMIN' ? 'bg-amber-500 text-black' : 'text-slate-400 bg-white/5'
-          }`}
-        >
-          Auction Admin
-        </button>
-        <button
-          onClick={() => setActiveTab('FRANCHISE_BIDDER')}
-          className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold ${
-            activeTab === 'FRANCHISE_BIDDER' ? 'bg-emerald-500 text-black' : 'text-slate-400 bg-white/5'
-          }`}
-        >
-          Franchise Bidder
-        </button>
-        <button
-          onClick={() => setActiveTab('STADIUM_VIEWER')}
-          className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold ${
-            activeTab === 'STADIUM_VIEWER' ? 'bg-cyan-500 text-black' : 'text-slate-400 bg-white/5'
-          }`}
-        >
-          Stadium Projector (4K)
-        </button>
-      </div>
-
-      {/* =====================================================================
-          MAIN OPERATIONAL VIEWPORT (ROLE-SPECIFIC)
-          ===================================================================== */}
-      <main className="flex-1 relative">
-        {activeTab === 'AUCTION_ADMIN' && <SportsAuctionAdminPanel />}
-        {activeTab === 'FRANCHISE_BIDDER' && <SportsBiddersPanel />}
+      <main className="flex-1 pb-4">
         {activeTab === 'STADIUM_VIEWER' && <SportsViewersPanel />}
+        {activeTab === 'FRANCHISE_BIDDER' && <SportsBiddersPanel />}
+        {activeTab === 'AUCTION_ADMIN' && <SportsAuctionAdminPanel />}
       </main>
 
       {/* =====================================================================
-          FOOTER WITH DISCREET COVERT SOFTWARE ADMIN TRIGGER
+          LIVE SPORTS BROADCAST TICKER (LOWER THIRDS)
           ===================================================================== */}
-      <footer className="px-6 py-2 bg-[#02040a] border-t border-white/5 text-[11px] text-slate-500 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-cyan-400 font-bold">RobiQuest 2026</span>
-          <span>•</span>
-          <span>Conducted by RoboCell</span>
-          <span>•</span>
-          <span>4 Competing Robotics Squads</span>
-        </div>
-
-        {/* Discreet Hidden Trigger: Subtle text with lock icon */}
-        <button
-          onClick={() => setIsSoftwareAdminModalOpen(true)}
-          className="group flex items-center gap-1.5 text-slate-600 hover:text-purple-400 transition-colors font-mono cursor-pointer"
-          title="Press Ctrl+Shift+S or click for Master System Gate"
-        >
-          <Lock className="w-3 h-3 opacity-40 group-hover:opacity-100 transition-opacity" />
-          <span>v2.4.0 • Enterprise Engine</span>
-        </button>
-      </footer>
+      <LiveBroadcastTicker />
 
       {/* =====================================================================
-          COVERT SOFTWARE ADMIN MODAL (HIDDEN BEHIND MASTER PASSKEY)
+          FOOTER (ROBOCELL BRANDING & STEALTH ACCESS)
           ===================================================================== */}
-      <HiddenSoftwareAdminModal
-        isOpen={isSoftwareAdminModalOpen}
-        onClose={() => setIsSoftwareAdminModalOpen(false)}
-      />
+      <footer className="bg-[#040714] border-t border-white/10 px-6 py-3 text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-white uppercase">ROBIQUEST 2026</span>
+          <span className="text-slate-600">•</span>
+          <span className="text-cyan-400 font-semibold">Conducted by RoboCell</span>
+          <span className="text-slate-600">•</span>
+          <span className="text-slate-400">Tech, Transform, Thrive</span>
+        </div>
+
+        <div className="flex items-center gap-4 text-[11px] font-mono">
+          <button
+            onClick={() => {
+              setAuthModalTab('ADMIN');
+              setIsAuthModalOpen(true);
+            }}
+            className="hover:text-cyan-300 transition-colors flex items-center gap-1"
+          >
+            <KeyRound className="w-3 h-3" />
+            <span>Role Sign-In</span>
+          </button>
+
+          <button
+            onClick={() => setIsSoftwareAdminModalOpen(true)}
+            className="hover:text-amber-300 transition-colors opacity-60 hover:opacity-100 flex items-center gap-1"
+            title="Software Maintenance (Ctrl+Shift+S)"
+          >
+            <Lock className="w-3 h-3" />
+            <span>Master Console</span>
+          </button>
+        </div>
+      </footer>
     </div>
   );
 };

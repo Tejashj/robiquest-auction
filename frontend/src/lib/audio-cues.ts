@@ -63,6 +63,32 @@ class AuctionAudioSynthesizer {
   }
 
   /**
+   * Crisp, high-tech electronic paddle raise confirmation click
+   */
+  public playPaddleRaise() {
+    if (this.isMuted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(440, now);
+    osc.frequency.exponentialRampToValueAtTime(880, now + 0.1);
+
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.19);
+  }
+
+  /**
    * Descending gentle alert chime when user gets outbid
    */
   public playOutbidAlert() {

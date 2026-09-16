@@ -43,6 +43,16 @@ export interface AuctionProfile {
   defaultMinIncrement: number;
 }
 
+export interface SportsContenderStats {
+  power: number;      // 0-100 Rating
+  velocity: number;   // 0-100 Rating
+  armor: number;      // 0-100 Rating
+  aiCompute: number;  // 0-100 Rating
+  combatClass?: string;
+  specialty?: string;
+  winRate?: string;
+}
+
 export interface AuctionLotItem {
   id: string;
   lotNumber: number;
@@ -61,7 +71,8 @@ export interface AuctionLotItem {
   imageUrls: string[];
   attributes: Record<string, string>;
   bidsCount: number;
-  // Sports Specific Fields
+  // Sports & Combat Specific Fields
+  contenderStats?: SportsContenderStats;
   playerRole?: PlayerRole;
   isOverseas?: boolean;
   playerStats?: PlayerStats;
@@ -85,6 +96,7 @@ export interface AuctionTeamParticipant {
   color: string;
   accentColor: string;
   logoUrl: string;
+  pin?: string;
   initialPurse: number;
   remainingPurse: number;
   totalSpent: number;
@@ -139,10 +151,15 @@ export interface AuctionEngineState {
   // 4. Celebration Modal
   celebration: CelebrationState;
 
-  // 5. Active User Operator Context
+  // 5. Active User Operator Context & Role Gate
   activeBidderTeamId: string | null;
   activeFranchiseId: string | null; // For Franchise Bidder Panel
   isMuted: boolean;
+
+  // Role Gate & Access Authentication
+  userRole: 'VIEWER' | 'ADMIN' | 'BIDDER';
+  authenticatedTeamId: string | null;
+  adminPin: string;
 
   // 6. Covert / Hidden Software Admin State
   isSoftwareAdminUnlocked: boolean;
@@ -151,6 +168,13 @@ export interface AuctionEngineState {
   // --------------------------------------------------------------------------
   // ACTIONS
   // --------------------------------------------------------------------------
+  // Role Authentication Actions
+  authenticateAsAdmin: (pin: string) => boolean;
+  authenticateAsTeam: (teamId: string, pin: string) => boolean;
+  setViewerMode: () => void;
+  logoutRole: () => void;
+  setAdminPin: (pin: string) => void;
+
   // Covert Software Admin Authentication
   unlockSoftwareAdmin: (key: string) => boolean;
   lockSoftwareAdmin: () => void;
@@ -268,6 +292,15 @@ export const STARTER_TEMPLATES = {
         imageUrls: [
           'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
         ],
+        contenderStats: {
+          power: 96,
+          velocity: 88,
+          armor: 82,
+          aiCompute: 99,
+          combatClass: 'SUPERCOMPUTE CORE',
+          specialty: '40 TOPS Autonomous SLAM Engine',
+          winRate: '98%',
+        },
         attributes: {
           Compute: '40 TOPS Ampere GPU AI Engine',
           Memory: '8GB 128-bit LPDDR5 High Bandwidth',
@@ -292,6 +325,15 @@ export const STARTER_TEMPLATES = {
         imageUrls: [
           'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80',
         ],
+        contenderStats: {
+          power: 84,
+          velocity: 95,
+          armor: 78,
+          aiCompute: 96,
+          combatClass: 'OMNI-PERCEPTION',
+          specialty: '30m 360° LiDAR Mapping',
+          winRate: '92%',
+        },
         attributes: {
           Range: '30 Meters Omni-directional 360°',
           SampleRate: '32 kHz High-Frequency Pulse',
@@ -316,6 +358,15 @@ export const STARTER_TEMPLATES = {
         imageUrls: [
           'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80',
         ],
+        contenderStats: {
+          power: 98,
+          velocity: 86,
+          armor: 99,
+          aiCompute: 75,
+          combatClass: 'HEAVY TITAN ARMOR',
+          specialty: '6WD Planetary Impact Shield',
+          winRate: '95%',
+        },
         attributes: {
           Material: 'Grade-5 Titanium & Carbon Fiber Weave',
           Drive: '6WD Integrated Planetary Gearbox',
@@ -340,6 +391,15 @@ export const STARTER_TEMPLATES = {
         imageUrls: [
           'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?auto=format&fit=crop&w=1200&q=80',
         ],
+        contenderStats: {
+          power: 92,
+          velocity: 90,
+          armor: 88,
+          aiCompute: 94,
+          combatClass: 'MANIPULATOR APEX',
+          specialty: '±0.05mm Sub-Millimeter Harmonic',
+          winRate: '90%',
+        },
         attributes: {
           Kinematics: '6 Degrees of Freedom Inverse Kinematics',
           Repeatability: '±0.05 mm Industrial Precision',
@@ -364,6 +424,15 @@ export const STARTER_TEMPLATES = {
         imageUrls: [
           'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=1200&q=80',
         ],
+        contenderStats: {
+          power: 99,
+          velocity: 98,
+          armor: 85,
+          aiCompute: 80,
+          combatClass: 'KINETIC PROPULSION',
+          specialty: '5.2 Nm Vector FOC Propulsion',
+          winRate: '96%',
+        },
         attributes: {
           Torque: '5.2 Nm Continuous Peak per Motor',
           Voltage: '24V - 48V Field-Oriented Control',
@@ -388,6 +457,15 @@ export const STARTER_TEMPLATES = {
         imageUrls: [
           'https://images.unsplash.com/photo-1507146426996-ef05306b995a?auto=format&fit=crop&w=1200&q=80',
         ],
+        contenderStats: {
+          power: 82,
+          velocity: 91,
+          armor: 80,
+          aiCompute: 98,
+          combatClass: 'SPATIAL INTELLIGENCE',
+          specialty: 'Active Stereo IR + 12MP RGB',
+          winRate: '93%',
+        },
         attributes: {
           Vision: 'Active Stereo IR + 12MP RGB Camera',
           OnDeviceAI: '4 TOPS Myriad X VPU Edge Inference',
@@ -405,6 +483,7 @@ export const STARTER_TEMPLATES = {
         color: '#06b6d4',
         accentColor: '#67e8f9',
         logoUrl: '/robocell-logo.png',
+        pin: 'TITAN101',
         initialPurse: 1000000,
         remainingPurse: 1000000,
         totalSpent: 0,
@@ -421,6 +500,7 @@ export const STARTER_TEMPLATES = {
         color: '#f43f5e',
         accentColor: '#fda4af',
         logoUrl: '/robocell-logo.png',
+        pin: 'KNIGHT102',
         initialPurse: 1000000,
         remainingPurse: 1000000,
         totalSpent: 0,
@@ -437,6 +517,7 @@ export const STARTER_TEMPLATES = {
         color: '#a855f7',
         accentColor: '#d8b4fe',
         logoUrl: '/robocell-logo.png',
+        pin: 'DYNAMO103',
         initialPurse: 1000000,
         remainingPurse: 1000000,
         totalSpent: 0,
@@ -453,6 +534,7 @@ export const STARTER_TEMPLATES = {
         color: '#f59e0b',
         accentColor: '#fde68a',
         logoUrl: '/robocell-logo.png',
+        pin: 'WARRIOR104',
         initialPurse: 1000000,
         remainingPurse: 1000000,
         totalSpent: 0,
@@ -875,6 +957,53 @@ export const useAuctionEngineStore = create<AuctionEngineState>()(
       activeBidderTeamId: STARTER_TEMPLATES.ROBIQUEST.teams[0]?.id || null,
       activeFranchiseId: STARTER_TEMPLATES.ROBIQUEST.teams[0]?.id || null,
       isMuted: false,
+
+      // Role Authentication & Gate State
+      userRole: 'VIEWER' as const,
+      authenticatedTeamId: null,
+      adminPin: 'ROBOCELL2026',
+
+      authenticateAsAdmin: (pin: string) => {
+        const state = get();
+        if (pin.trim().toUpperCase() === state.adminPin.trim().toUpperCase()) {
+          set({ userRole: 'ADMIN' });
+          soundEffects.playGavelStrike();
+          return true;
+        }
+        return false;
+      },
+
+      authenticateAsTeam: (teamId: string, pin: string) => {
+        const state = get();
+        const team = state.teams.find((t) => t.id === teamId);
+        if (!team) return false;
+        const validPin = team.pin ? team.pin.toUpperCase() : `TEAM${team.paddleNumber}`;
+        if (pin.trim().toUpperCase() === validPin) {
+          set({
+            userRole: 'BIDDER',
+            authenticatedTeamId: teamId,
+            activeFranchiseId: teamId,
+            activeBidderTeamId: teamId,
+          });
+          soundEffects.playPaddleRaise();
+          return true;
+        }
+        return false;
+      },
+
+      setViewerMode: () => {
+        set({ userRole: 'VIEWER', authenticatedTeamId: null });
+      },
+
+      logoutRole: () => {
+        set({ userRole: 'VIEWER', authenticatedTeamId: null });
+      },
+
+      setAdminPin: (pin: string) => {
+        if (pin.trim().length >= 4) {
+          set({ adminPin: pin.trim() });
+        }
+      },
 
       // Hidden Software Admin State
       isSoftwareAdminUnlocked: false,
@@ -1330,7 +1459,7 @@ export const useAuctionEngineStore = create<AuctionEngineState>()(
       },
     }),
     {
-      name: 'robocell-robiquest-auction-store-v1',
+      name: 'robocell-robiquest-auction-store-v2',
     }
   )
 );
