@@ -185,25 +185,25 @@ export const HiddenSoftwareAdminModal: React.FC<HiddenSoftwareAdminModalProps> =
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-2xl animate-in fade-in duration-200">
-      <div className="w-full max-w-5xl rounded-3xl bg-[#080d1a] border border-white/15 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="w-full max-w-5xl rounded-[18px] bg-black border border-white/15 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* ===================================================================
             HEADER (RESTRICTED IDENTITY)
             =================================================================== */}
-        <div className="px-6 py-4 bg-[#050811] border-b border-white/10 flex items-center justify-between">
+        <div className="px-6 py-4 bg-black border-b border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-600/30 border border-purple-400/30">
-              <ShieldAlert className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 rounded-[18px] bg-[#16A085] flex items-center justify-center shadow-lg shadow-[#16A085]/30">
+              <ShieldAlert className="w-5 h-5 text-black" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono font-black uppercase tracking-widest text-purple-400">
+                <span className="text-xs font-mono font-black uppercase tracking-widest text-[#16A085]">
                   RESTRICTED MASTER CONTROL
                 </span>
-                <span className="px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 text-[10px] font-mono font-bold">
+                <span className="px-1.5 py-0.2 rounded-[18px] bg-[#16A085]/20 text-[#16A085] text-[10px] font-mono font-bold">
                   SYSADMIN ONLY
                 </span>
               </div>
-              <h2 className="text-base font-black text-white tracking-tight uppercase">
+              <h2 className="text-base font-black text-[#D8CFB4] tracking-tight uppercase font-poppins">
                 Software Administration Suite
               </h2>
             </div>
@@ -211,7 +211,7 @@ export const HiddenSoftwareAdminModal: React.FC<HiddenSoftwareAdminModalProps> =
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all"
+            className="p-1.5 rounded-[18px] bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all"
             title="Close Admin Panel"
           >
             <X className="w-5 h-5" />
@@ -223,15 +223,15 @@ export const HiddenSoftwareAdminModal: React.FC<HiddenSoftwareAdminModalProps> =
             =================================================================== */}
         {!isSoftwareAdminUnlocked ? (
           <div className="p-8 sm:p-12 text-center max-w-md mx-auto my-auto space-y-6">
-            <div className="w-16 h-16 rounded-3xl bg-purple-500/10 border border-purple-500/30 text-purple-400 flex items-center justify-center mx-auto shadow-2xl">
+            <div className="w-16 h-16 rounded-[18px] bg-[#16A085]/15 border border-[#16A085]/30 text-[#16A085] flex items-center justify-center mx-auto shadow-2xl">
               <Key className="w-8 h-8" />
             </div>
 
             <div className="space-y-1">
-              <h3 className="text-xl font-black text-white uppercase tracking-tight">
+              <h3 className="text-xl font-black text-[#D8CFB4] uppercase tracking-tight font-poppins">
                 Authentication Required
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-gray-400">
                 This system governance panel is restricted. Enter the master security passkey to unlock tournament architecture.
               </p>
             </div>
@@ -243,7 +243,7 @@ export const HiddenSoftwareAdminModal: React.FC<HiddenSoftwareAdminModalProps> =
                   value={passkeyInput}
                   onChange={(e) => setPasskeyInput(e.target.value)}
                   placeholder="Enter Master Security Key..."
-                  className="w-full px-4 py-3 rounded-2xl bg-black/60 border border-white/15 text-white text-center font-mono text-sm tracking-wider focus:outline-none focus:border-purple-400"
+                  className="w-full px-4 py-3 rounded-[18px] bg-white/[0.03] border border-transparent text-white text-center font-mono text-sm tracking-wider focus:outline-none focus:border-[#16A085] focus:ring-1 focus:ring-[#16A085]"
                   autoFocus
                 />
                 {authError && (
@@ -257,21 +257,21 @@ export const HiddenSoftwareAdminModal: React.FC<HiddenSoftwareAdminModalProps> =
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 font-bold text-xs"
+                  className="flex-1 py-3 rounded-[18px] bg-white/5 hover:bg-white/10 text-gray-300 font-bold text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs shadow-lg shadow-purple-600/30"
+                  className="flex-1 py-3 rounded-[18px] bg-[#16A085] hover:brightness-110 text-black font-extrabold text-xs shadow-lg shadow-[#16A085]/30"
                 >
                   Unlock Admin
                 </button>
               </div>
             </form>
 
-            <p className="text-[10px] text-slate-500 font-mono">
-              Default Deployment Key: <code className="text-slate-400">APEX-SPORTS-MASTER-2026</code>
+            <p className="text-[10px] text-gray-500 font-mono">
+              Default Deployment Key: <code className="text-[#D8CFB4]">APEX-SPORTS-MASTER-2026</code>
             </p>
           </div>
         ) : (
@@ -280,14 +280,14 @@ export const HiddenSoftwareAdminModal: React.FC<HiddenSoftwareAdminModalProps> =
              ================================================================= */
           <div className="flex-1 overflow-y-auto flex flex-col">
             {/* Nav Tabs */}
-            <div className="px-6 py-2.5 bg-[#060a15] border-b border-white/10 flex items-center justify-between gap-3 overflow-x-auto">
+            <div className="px-6 py-2.5 bg-black border-b border-white/10 flex items-center justify-between gap-3 overflow-x-auto">
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setActiveTab('RULES')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-[18px] text-xs font-bold transition-all flex items-center gap-1.5 ${
                     activeTab === 'RULES'
-                      ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-[#16A085] text-black shadow-lg shadow-[#16A085]/30 font-black'
+                      : 'text-gray-400 hover:text-white'
                   }`}
                 >
                   <Settings className="w-3.5 h-3.5" />
@@ -296,10 +296,10 @@ export const HiddenSoftwareAdminModal: React.FC<HiddenSoftwareAdminModalProps> =
 
                 <button
                   onClick={() => setActiveTab('TEAMS')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-[18px] text-xs font-bold transition-all flex items-center gap-1.5 ${
                     activeTab === 'TEAMS'
-                      ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-[#16A085] text-black shadow-lg shadow-[#16A085]/30 font-black'
+                      : 'text-gray-400 hover:text-white'
                   }`}
                 >
                   <Users className="w-3.5 h-3.5" />
@@ -308,10 +308,10 @@ export const HiddenSoftwareAdminModal: React.FC<HiddenSoftwareAdminModalProps> =
 
                 <button
                   onClick={() => setActiveTab('CATALOG')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-[18px] text-xs font-bold transition-all flex items-center gap-1.5 ${
                     activeTab === 'CATALOG'
-                      ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-[#16A085] text-black shadow-lg shadow-[#16A085]/30 font-black'
+                      : 'text-gray-400 hover:text-white'
                   }`}
                 >
                   <Package className="w-3.5 h-3.5" />
@@ -320,10 +320,10 @@ export const HiddenSoftwareAdminModal: React.FC<HiddenSoftwareAdminModalProps> =
 
                 <button
                   onClick={() => setActiveTab('SYSTEM')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-[18px] text-xs font-bold transition-all flex items-center gap-1.5 ${
                     activeTab === 'SYSTEM'
-                      ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-[#16A085] text-black shadow-lg shadow-[#16A085]/30 font-black'
+                      : 'text-gray-400 hover:text-white'
                   }`}
                 >
                   <ShieldAlert className="w-3.5 h-3.5" />
@@ -333,7 +333,7 @@ export const HiddenSoftwareAdminModal: React.FC<HiddenSoftwareAdminModalProps> =
 
               <button
                 onClick={lockSoftwareAdmin}
-                className="px-3 py-1 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-mono font-bold flex items-center gap-1"
+                className="px-3 py-1 rounded-[18px] bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-mono font-bold flex items-center gap-1"
               >
                 <Lock className="w-3.5 h-3.5" /> Lock Console
               </button>
@@ -669,18 +669,18 @@ export const HiddenSoftwareAdminModal: React.FC<HiddenSoftwareAdminModalProps> =
                             <td className="p-3 font-sans font-bold text-white">{l.title}</td>
                             <td className="p-3 font-sans">{l.category}</td>
                             <td className="p-3 font-sans">{l.isOverseas ? '★ Overseas' : 'Domestic'}</td>
-                            <td className="p-3 text-emerald-400 font-bold">{formatAuctionCurrency(l.startingBid, profile.currency)}</td>
+                            <td className="p-3 text-[#D8CFB4] font-bold">{formatAuctionCurrency(l.startingBid, profile.currency)}</td>
                             <td className="p-3 font-sans">{l.status}</td>
                             <td className="p-3 text-right font-sans space-x-2">
                               <button
                                 onClick={() => setActiveLot(l.id)}
-                                className="px-2 py-1 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-bold"
+                                className="px-2.5 py-1 rounded-[18px] bg-[#16A085]/20 text-[#16A085] text-[10px] font-bold border border-[#16A085]/30"
                               >
                                 Stage
                               </button>
                               <button
                                 onClick={() => deleteLot(l.id)}
-                                className="p-1 rounded bg-red-500/10 text-red-400"
+                                className="p-1 rounded-[18px] bg-red-500/10 text-red-400"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -699,12 +699,12 @@ export const HiddenSoftwareAdminModal: React.FC<HiddenSoftwareAdminModalProps> =
               {activeTab === 'SYSTEM' && (
                 <div className="space-y-6 text-xs">
                   {/* Master Passkey Change Form */}
-                  <form onSubmit={handleUpdateMasterKey} className="p-5 rounded-2xl bg-black/40 border border-white/10 space-y-3">
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                      <Key className="w-4 h-4 text-purple-400" />
+                  <form onSubmit={handleUpdateMasterKey} className="p-5 rounded-[18px] bg-white/[0.03] border border-white/[0.08] space-y-3">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5 font-poppins">
+                      <Key className="w-4 h-4 text-[#16A085]" />
                       Reconfigure Master Security Key
                     </h3>
-                    <p className="text-slate-400 text-[11px]">
+                    <p className="text-gray-400 text-[11px]">
                       Change the secret passkey required to access this hidden software admin panel.
                     </p>
 
@@ -714,69 +714,69 @@ export const HiddenSoftwareAdminModal: React.FC<HiddenSoftwareAdminModalProps> =
                         value={newMasterKeyInput}
                         onChange={(e) => setNewMasterKeyInput(e.target.value)}
                         placeholder="Enter new master key (min 6 chars)..."
-                        className="flex-1 px-4 py-2 rounded-xl bg-black/60 border border-white/10 text-white font-mono text-xs"
+                        className="flex-1 px-4 py-2 rounded-[18px] bg-black border border-white/[0.08] text-white font-mono text-xs focus:border-[#16A085] outline-none"
                       />
                       <button
                         type="submit"
-                        className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold"
+                        className="px-5 py-2 rounded-[18px] bg-[#16A085] hover:bg-[#1abc9c] text-black font-extrabold"
                       >
                         Update Key
                       </button>
                     </div>
 
                     {masterKeySuccess && (
-                      <p className="text-emerald-400 font-bold text-[11px] flex items-center gap-1">
+                      <p className="text-[#16A085] font-bold text-[11px] flex items-center gap-1">
                         <CheckCircle2 className="w-3.5 h-3.5" /> Master security key updated successfully!
                       </p>
                     )}
                   </form>
 
                   {/* Export & Import Data */}
-                  <div className="p-5 rounded-2xl bg-black/40 border border-white/10 space-y-4">
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                  <div className="p-5 rounded-[18px] bg-white/[0.03] border border-white/[0.08] space-y-4">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider font-poppins">
                       Tournament Data Export / Import
                     </h3>
 
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 flex-wrap">
                       <button
                         onClick={handleExportJson}
-                        className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold flex items-center gap-2"
+                        className="px-4 py-2.5 rounded-[18px] bg-white/[0.05] hover:bg-white/[0.1] text-white font-bold flex items-center gap-2 border border-white/[0.08]"
                       >
-                        <Download className="w-4 h-4 text-cyan-400" />
+                        <Download className="w-4 h-4 text-[#16A085]" />
                         Export Tournament JSON Backup
                       </button>
 
                       <button
                         onClick={() => loadPresetTemplate('ROBIQUEST')}
-                        className="px-4 py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 font-bold flex items-center gap-2"
+                        className="px-4 py-2.5 rounded-[18px] bg-[#16A085]/20 hover:bg-[#16A085]/30 text-[#16A085] border border-[#16A085]/30 font-bold flex items-center gap-2"
                       >
-                        <RotateCcw className="w-4 h-4 text-cyan-400" />
+                        <RotateCcw className="w-4 h-4 text-[#16A085]" />
                         Reset to RobiQuest (RoboCell) 4-Team Blueprint
                       </button>
 
                       <button
                         onClick={() => loadPresetTemplate('SPORTS_IPL')}
-                        className="px-4 py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-bold flex items-center gap-2"
+                        className="px-4 py-2.5 rounded-[18px] bg-white/[0.03] hover:bg-white/[0.08] text-[#D8CFB4] border border-white/[0.08] font-bold flex items-center gap-2"
                       >
-                        <RotateCcw className="w-4 h-4 text-amber-400" />
+                        <RotateCcw className="w-4 h-4 text-[#D8CFB4]" />
                         Reset to Sports IPL Blueprint
                       </button>
                     </div>
 
-                    <div className="pt-3 border-t border-white/10 space-y-2">
-                      <label className="text-slate-400 block font-semibold">Import JSON State:</label>
+                    <div className="pt-3 border-t border-white/[0.08] space-y-2">
+                      <label className="text-gray-400 block font-semibold">Import JSON State:</label>
                       <textarea
                         value={importJsonText}
                         onChange={(e) => setImportJsonText(e.target.value)}
                         placeholder="Paste tournament JSON payload here..."
                         rows={3}
-                        className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/10 text-white font-mono text-[11px]"
+                        className="w-full px-3 py-2 rounded-[18px] bg-black border border-white/[0.08] text-white font-mono text-[11px] focus:border-[#16A085] outline-none"
                       />
                       <div className="flex justify-between items-center">
-                        <span className="text-xs text-amber-300">{importFeedback}</span>
+                        <span className="text-xs text-[#D8CFB4]">{importFeedback}</span>
                         <button
                           onClick={handleImportJson}
-                          className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-black font-bold text-xs"
+                          className="px-4 py-1.5 rounded-[18px] bg-[#16A085] hover:bg-[#1abc9c] text-black font-extrabold text-xs shadow-lg shadow-[#16A085]/30"
                         >
                           Import Tournament Payload
                         </button>

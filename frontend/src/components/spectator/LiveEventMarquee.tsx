@@ -16,10 +16,10 @@ export const LiveEventMarquee: React.FC = () => {
   const { recentEvents } = useSpectatorStore();
 
   return (
-    <div className="w-full bg-[#03050a] border-y border-white/10 px-4 py-2 flex items-center gap-3 overflow-hidden">
+    <div className="w-full bg-[#000000] border-y border-white/[0.08] px-4 py-2 flex items-center gap-3 overflow-hidden font-poppins">
       {/* Live Badge */}
-      <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-red-600/20 border border-red-500/40 text-red-400 text-xs font-mono font-bold flex-shrink-0">
-        <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+      <div className="flex items-center gap-2 px-3 py-1 rounded-[18px] bg-[#16A085]/15 border border-[#16A085]/30 text-[#16A085] text-xs font-mono font-bold flex-shrink-0">
+        <span className="w-2 h-2 rounded-full bg-[#16A085] animate-ping" />
         LIVE WIRE
       </div>
 
@@ -37,20 +37,20 @@ export const LiveEventMarquee: React.FC = () => {
         >
           {/* Double the list for seamless continuous infinite marquee loop */}
           {[...recentEvents, ...recentEvents].map((evt, idx) => (
-            <div key={`${evt.id}-${idx}`} className="flex items-center gap-2 text-slate-300">
+            <div key={`${evt.id}-${idx}`} className="flex items-center gap-2 text-gray-300">
               {evt.type === 'HAMMER' ? (
-                <span className="p-1 rounded bg-amber-500/20 text-amber-300">
+                <span className="p-1 rounded-[18px] bg-[#D8CFB4]/20 text-[#D8CFB4]">
                   <Trophy className="w-3 h-3" />
                 </span>
               ) : (
-                <span className="p-1 rounded bg-cyan-500/20 text-cyan-300">
+                <span className="p-1 rounded-[18px] bg-[#16A085]/20 text-[#16A085]">
                   <Zap className="w-3 h-3" />
                 </span>
               )}
               {evt.teamCode && (
-                <span className="font-bold text-amber-300">[{evt.teamCode}]</span>
+                <span className="font-bold text-[#D8CFB4]">[{evt.teamCode}]</span>
               )}
-              <span className="text-slate-200">{evt.text}</span>
+              <span className="text-white">{evt.text}</span>
               <span className="text-white/20">•</span>
             </div>
           ))}

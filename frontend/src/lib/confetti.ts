@@ -20,12 +20,12 @@ export function triggerConfettiCannon(options: ConfettiOptions = {}) {
   const originX = options.origin?.x ?? 0.5;
   const originY = options.origin?.y ?? 0.6;
   const colors = options.colors || [
-    '#f59e0b', // Amber
-    '#10b981', // Emerald
-    '#06b6d4', // Cyan
-    '#8b5cf6', // Purple
-    '#ef4444', // Red
-    '#ffffff', // White
+    '#16A085', // Theme Primary Emerald
+    '#D8CFB4', // Theme Foreground Gold
+    '#1abc9c', // Primary Light
+    '#ffffff', // Clean White
+    '#16A085',
+    '#D8CFB4',
   ];
 
   let canvas = document.getElementById('broadcast-confetti-canvas') as HTMLCanvasElement;

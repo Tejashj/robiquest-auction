@@ -188,6 +188,247 @@ class AuctionAudioSynthesizer {
     osc.start(now);
     osc.stop(now + 0.06);
   }
+
+  /**
+   * Heavy resonant gavel strike with woodblock impact & sub-bass reverb for SOLD!
+   */
+  public playGavelStrikeHeavy() {
+    if (this.isMuted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+
+    // Sub-bass impact
+    const subOsc = ctx.createOscillator();
+    const subGain = ctx.createGain();
+    subOsc.type = 'sine';
+    subOsc.frequency.setValueAtTime(180, now);
+    subOsc.frequency.exponentialRampToValueAtTime(35, now + 0.25);
+    subGain.gain.setValueAtTime(0.6, now);
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+    subOsc.connect(subGain);
+    subGain.connect(ctx.destination);
+    subOsc.start(now);
+    subOsc.stop(now + 0.56);
+
+    // Sharp wood block click
+    const clickOsc = ctx.createOscillator();
+    const clickGain = ctx.createGain();
+    clickOsc.type = 'triangle';
+    clickOsc.frequency.setValueAtTime(950, now);
+    clickOsc.frequency.exponentialRampToValueAtTime(120, now + 0.08);
+    clickGain.gain.setValueAtTime(0.4, now);
+    clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+    clickOsc.connect(clickGain);
+    clickGain.connect(ctx.destination);
+    clickOsc.start(now);
+    clickOsc.stop(now + 0.11);
+
+    // Double bounce
+    setTimeout(() => {
+      const bCtx = this.getContext();
+      if (!bCtx) return;
+      const bNow = bCtx.currentTime;
+      const bOsc = bCtx.createOscillator();
+      const bGain = bCtx.createGain();
+      bOsc.type = 'sine';
+      bOsc.frequency.setValueAtTime(130, bNow);
+      bOsc.frequency.exponentialRampToValueAtTime(30, bNow + 0.2);
+      bGain.gain.setValueAtTime(0.35, bNow);
+      bGain.gain.exponentialRampToValueAtTime(0.001, bNow + 0.35);
+      bOsc.connect(bGain);
+      bGain.connect(bCtx.destination);
+      bOsc.start(bNow);
+      bOsc.stop(bNow + 0.36);
+    }, 120);
+  }
+
+  /**
+   * Sharp woodblock tap for warning gavel taps (Going Once, Going Twice)
+   */
+  public playWoodBlockStrike() {
+    if (this.isMuted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(620, now);
+    osc.frequency.exponentialRampToValueAtTime(110, now + 0.14);
+
+    gain.gain.setValueAtTime(0.35, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.22);
+  }
+
+  /**
+   * Dramatic hollow gong / minor chord resonance for UNSOLD / PASSED lots
+   */
+  public playUnsoldGong() {
+    if (this.isMuted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    const freqs = [330.0, 261.63, 196.0]; // E4, C4, G3 (dark minor drop)
+
+    freqs.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+
+      gain.gain.setValueAtTime(0, now + idx * 0.08);
+      gain.gain.linearRampToValueAtTime(0.15, now + idx * 0.08 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.7);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now + idx * 0.08);
+      osc.stop(now + idx * 0.08 + 0.75);
+    });
+  }
+
+  /**
+   * Aerodynamic whoosh/spring sound when an auction paddle surges up
+   */
+  public playPaddleSwoosh() {
+    if (this.isMuted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(220, now);
+    osc.frequency.exponentialRampToValueAtTime(780, now + 0.12);
+
+    gain.gain.setValueAtTime(0.01, now);
+    gain.gain.linearRampToValueAtTime(0.2, now + 0.04);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.18);
+  }
+
+  // ==========================================================================
+  // REAL-TIME AUCTIONEER VOICE CHANT ENGINE (WEB SPEECH API)
+  // Zero-Asset Broadcast Vocal Calls: Going Once, Going Twice, Against the Room, Sold!
+  // ==========================================================================
+  private isVoiceEnabled: boolean = true;
+
+  public setVoiceEnabled(enabled: boolean) {
+    this.isVoiceEnabled = enabled;
+  }
+
+  public toggleVoice(): boolean {
+    this.isVoiceEnabled = !this.isVoiceEnabled;
+    return this.isVoiceEnabled;
+  }
+
+  public speak(text: string, rate: number = 1.05, pitch: number = 1.0) {
+    if (this.isMuted || !this.isVoiceEnabled || typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      return;
+    }
+
+    try {
+      // Cancel previous utterances to avoid speech queue congestion
+      window.speechSynthesis.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = rate;
+      utterance.pitch = pitch;
+      utterance.volume = 1.0;
+
+      // Select natural English voice if available in browser
+      const voices = window.speechSynthesis.getVoices();
+      const englishVoice =
+        voices.find(
+          (v) =>
+            v.lang.startsWith('en') &&
+            (v.name.includes('Natural') ||
+              v.name.includes('David') ||
+              v.name.includes('George') ||
+              v.name.includes('Google') ||
+              v.name.includes('Male'))
+        ) || voices.find((v) => v.lang.startsWith('en'));
+
+      if (englishVoice) {
+        utterance.voice = englishVoice;
+      }
+
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      console.warn('Speech synthesis callout warning:', e);
+    }
+  }
+
+  public speakGoingOnce(priceStr?: string) {
+    this.playWoodBlockStrike();
+    const text = priceStr ? `Going once, at ${priceStr}!` : 'Going once!';
+    setTimeout(() => {
+      this.speak(text, 1.08, 1.05);
+    }, 60);
+  }
+
+  public speakGoingTwice(leaderName?: string, priceStr?: string) {
+    this.playWoodBlockStrike();
+    const text = leaderName
+      ? `Going twice! Against the room to ${leaderName} at ${priceStr || ''}!`
+      : `Going twice! Against the room!`;
+    setTimeout(() => {
+      this.speak(text, 1.12, 1.08);
+    }, 60);
+  }
+
+  public speakSold(winnerName: string, priceStr: string) {
+    this.playGavelStrikeHeavy();
+    const text = `The hammer falls! Sold to ${winnerName} for ${priceStr}!`;
+    setTimeout(() => {
+      this.speak(text, 1.1, 1.0);
+    }, 250);
+  }
+
+  public speakPassed(lotTitle?: string) {
+    this.playGavelStrikeHeavy();
+    this.playUnsoldGong();
+    const text = lotTitle ? `Passed. ${lotTitle} remains unsold.` : 'Passed! Lot is unsold.';
+    setTimeout(() => {
+      this.speak(text, 1.05, 0.95);
+    }, 280);
+  }
+
+  public speakNewBid(teamName: string, priceStr: string) {
+    this.playPaddleSwoosh();
+    this.playBidAccepted();
+    const phrases = [
+      `${priceStr} with ${teamName}! Against the room!`,
+      `Bid ${priceStr} to ${teamName}! Against the room!`,
+      `${teamName} takes the floor at ${priceStr}!`,
+    ];
+    const phrase = phrases[Math.floor(Math.random() * phrases.length)];
+    setTimeout(() => {
+      this.speak(phrase, 1.18, 1.06);
+    }, 180);
+  }
 }
 
 export const soundEffects = new AuctionAudioSynthesizer();
+
+

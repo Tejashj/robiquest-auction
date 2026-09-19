@@ -3,10 +3,11 @@
 /**
  * ============================================================================
  * ROLE AUTHENTICATION GATE MODAL
- * Strict Role Separation:
- *  - 🔨 Official Auctioneer (Admin PIN required, e.g. ROBOCELL2026)
- *  - 🙋 Franchise Bidder (Team selection + confidential Team PIN, e.g. TITAN101)
- *  - 📺 Stadium Spectator (Public 4K broadcast screen, read-only)
+ * Strictly Styled using:
+ *  - Primary: #16A085 (Hover: #1abc9c)
+ *  - Headline Accent: #D8CFB4
+ *  - Background: #000000
+ *  - Border Radius: 18px everywhere
  * ============================================================================
  */
 
@@ -105,39 +106,35 @@ export const RoleAuthGateModal: React.FC<RoleAuthGateModalProps> = ({
   const selectedTeam = teams.find((t) => t.id === selectedTeamId) || teams[0];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg rounded-[18px] bg-black border border-[#16A085]/40 shadow-2xl shadow-[#16A085]/20 overflow-hidden text-white p-6 sm:p-8">
-        {/* Glow ambient effects */}
-        <div className="absolute -top-24 -right-24 w-60 h-60 rounded-full bg-[#16A085]/20 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-60 h-60 rounded-full bg-[#D8CFB4]/10 blur-3xl pointer-events-none" />
-
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200 font-poppins">
+      <div className="relative w-full max-w-lg rounded-[18px] bg-[#000000] border border-white/[0.08] text-white p-6 sm:p-8">
         {/* Header */}
-        <div className="relative flex items-center justify-between pb-5 border-b border-white/10">
+        <div className="relative flex items-center justify-between pb-5 border-b border-white/[0.08]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-[18px] bg-black border-2 border-[#16A085] p-1 flex items-center justify-center shadow-lg shadow-[#16A085]/30">
+            <div className="w-11 h-11 rounded-[18px] bg-black border border-[#16A085]/40 p-1 flex items-center justify-center">
               <img src="/robocell-crest.png" alt="RoboCell" className="w-full h-full object-contain" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono font-bold text-[#16A085] uppercase tracking-wider">
-                  ROBIQUEST 2026 • SECURITY GATE
+                  SECURITY & ROLES
                 </span>
               </div>
-              <h2 className="text-lg font-black text-[#D8CFB4] tracking-tight uppercase font-poppins">
-                Access Verification
+              <h2 className="text-lg font-bold text-white tracking-tight uppercase font-poppins">
+                Arena Access Gate
               </h2>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-[18px] bg-white/[0.03] hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition-all"
+            className="p-2 rounded-[18px] bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] text-slate-300 hover:text-white transition-all"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Selection */}
-        <div className="grid grid-cols-3 gap-2 mt-5 p-1 bg-white/[0.03] border border-white/10 rounded-[18px]">
+        <div className="grid grid-cols-3 gap-2 mt-5 p-1 bg-white/[0.03] border border-white/[0.08] rounded-[18px]">
           <button
             type="button"
             onClick={() => {
@@ -146,8 +143,8 @@ export const RoleAuthGateModal: React.FC<RoleAuthGateModalProps> = ({
             }}
             className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-[18px] text-xs font-bold transition-all ${
               activeTab === 'ADMIN'
-                ? 'bg-[#16A085] text-black shadow-lg shadow-[#16A085]/30 font-black'
-                : 'text-gray-400 hover:text-[#D8CFB4] hover:bg-white/5'
+                ? 'bg-[#16A085] text-black font-bold'
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.03]'
             }`}
           >
             <Gavel className="w-4 h-4 mb-1" />
@@ -162,8 +159,8 @@ export const RoleAuthGateModal: React.FC<RoleAuthGateModalProps> = ({
             }}
             className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-[18px] text-xs font-bold transition-all ${
               activeTab === 'BIDDER'
-                ? 'bg-[#16A085] text-black shadow-lg shadow-[#16A085]/30 font-black'
-                : 'text-gray-400 hover:text-[#D8CFB4] hover:bg-white/5'
+                ? 'bg-[#16A085] text-black font-bold'
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.03]'
             }`}
           >
             <Users className="w-4 h-4 mb-1" />
@@ -178,8 +175,8 @@ export const RoleAuthGateModal: React.FC<RoleAuthGateModalProps> = ({
             }}
             className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-[18px] text-xs font-bold transition-all ${
               activeTab === 'VIEWER'
-                ? 'bg-[#16A085] text-black shadow-lg shadow-[#16A085]/30 font-black'
-                : 'text-gray-400 hover:text-[#D8CFB4] hover:bg-white/5'
+                ? 'bg-[#16A085] text-black font-bold'
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.03]'
             }`}
           >
             <Tv className="w-4 h-4 mb-1" />
@@ -189,7 +186,7 @@ export const RoleAuthGateModal: React.FC<RoleAuthGateModalProps> = ({
 
         {/* Error Notification */}
         {errorMsg && (
-          <div className="mt-4 p-3 rounded-[18px] bg-red-500/20 border border-red-500/40 text-red-200 text-xs flex items-center gap-2 animate-in fade-in">
+          <div className="mt-4 p-3.5 rounded-[18px] bg-white/[0.03] border border-red-500/30 text-red-400 text-xs flex items-center gap-2 font-medium">
             <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-400" />
             <span>{errorMsg}</span>
           </div>
@@ -198,16 +195,16 @@ export const RoleAuthGateModal: React.FC<RoleAuthGateModalProps> = ({
         {/* TAB 1: AUCTIONEER ADMIN */}
         {activeTab === 'ADMIN' && (
           <form onSubmit={handleAdminSubmit} className="mt-5 space-y-4">
-            <div className="p-3.5 rounded-[18px] bg-white/[0.03] border border-[#16A085]/30 text-xs text-[#D8CFB4] leading-relaxed">
+            <div className="p-4 rounded-[18px] bg-white/[0.03] border border-white/[0.08] text-xs text-slate-300 leading-relaxed">
               <div className="font-bold flex items-center gap-1.5 text-[#16A085] mb-1">
                 <Lock className="w-3.5 h-3.5" />
                 Tournament Official Authority
               </div>
-              Unlocks full stage clock control, gavel strikes (Fair Warning, Going Twice, Hammer Sold), and the Contender CMS Studio.
+              Unlocks full stage clock control, gavel strikes (Going Once, Going Twice, Hammer Sold), Contender Studio, and Franchise Management.
             </div>
 
             <div>
-              <label className="block text-xs font-mono font-bold text-[#D8CFB4] uppercase tracking-wider mb-2">
+              <label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-2">
                 Auctioneer Master PIN:
               </label>
               <div className="relative">
@@ -217,31 +214,31 @@ export const RoleAuthGateModal: React.FC<RoleAuthGateModalProps> = ({
                   onChange={(e) => setAdminPinInput(e.target.value)}
                   placeholder="e.g. ROBOCELL2026"
                   autoFocus
-                  className="w-full px-4 py-3 rounded-[18px] bg-white/[0.03] border-none text-white font-mono placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#16A085] text-sm tracking-widest"
+                  className="w-full theme-input font-mono text-sm tracking-widest"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPin(!showPin)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
                 >
                   {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              <div className="flex items-center justify-between mt-1.5 text-[11px] text-gray-400">
-                <span>Default PIN: <strong className="text-[#16A085] font-mono">ROBOCELL2026</strong></span>
+              <div className="flex items-center justify-between mt-1.5 text-[11px] text-slate-400 font-mono">
+                <span>Default PIN: <strong className="text-[#16A085]">ROBOCELL2026</strong></span>
                 <button
                   type="button"
                   onClick={() => setAdminPinInput('ROBOCELL2026')}
                   className="text-[#16A085] hover:underline"
                 >
-                  Quick Fill
+                  Auto-Fill
                 </button>
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full py-3.5 rounded-[18px] bg-[#16A085] hover:bg-[#1abc9c] text-black font-black uppercase text-sm tracking-wider shadow-lg shadow-[#16A085]/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-[18px] theme-btn-primary text-black font-bold uppercase text-sm tracking-wider flex items-center justify-center gap-2"
             >
               <Gavel className="w-4 h-4" />
               <span>Unlock Auctioneer Console</span>
@@ -253,10 +250,10 @@ export const RoleAuthGateModal: React.FC<RoleAuthGateModalProps> = ({
         {activeTab === 'BIDDER' && (
           <form onSubmit={handleTeamSubmit} className="mt-5 space-y-4">
             <div>
-              <label className="block text-xs font-mono font-bold text-[#D8CFB4] uppercase tracking-wider mb-2">
-                Select Your Competing Franchise:
+              <label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-2">
+                Select Your Franchise Team:
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2.5 max-h-44 overflow-y-auto pr-1">
                 {teams.map((t) => {
                   const isSelected = t.id === selectedTeamId;
                   return (
@@ -267,21 +264,20 @@ export const RoleAuthGateModal: React.FC<RoleAuthGateModalProps> = ({
                         setSelectedTeamId(t.id);
                         setErrorMsg(null);
                       }}
-                      className={`p-3 rounded-[18px] border text-left transition-all relative overflow-hidden flex items-center gap-2.5 ${
+                      className={`p-3 rounded-[18px] border text-left transition-all flex items-center gap-2.5 bg-[#000000] ${
                         isSelected
-                          ? 'border-2 shadow-lg'
-                          : 'bg-white/[0.02] border-white/10 opacity-70 hover:opacity-100 hover:border-white/25'
+                          ? 'border-[#16A085]'
+                          : 'border-white/[0.08] hover:border-white/[0.2]'
                       }`}
                       style={{
-                        borderColor: isSelected ? t.color : undefined,
-                        backgroundColor: isSelected ? `${t.color}20` : undefined,
-                        boxShadow: isSelected ? `0 0 15px ${t.color}35` : undefined,
+                        borderColor: isSelected ? '#16A085' : undefined,
+                        backgroundColor: isSelected ? 'rgba(22, 160, 133, 0.15)' : undefined,
                       }}
                     >
-                      <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: t.color }} />
+                      <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: t.color || '#16A085' }} />
                       <div className="truncate">
-                        <div className="text-xs font-bold text-white truncate">{t.name}</div>
-                        <div className="text-[10px] font-mono text-gray-400">Paddle #{t.paddleNumber}</div>
+                        <div className="text-xs font-bold text-white truncate font-poppins uppercase">{t.name}</div>
+                        <div className="text-[10px] font-mono text-slate-400">Paddle #{t.paddleNumber}</div>
                       </div>
                     </button>
                   );
@@ -290,66 +286,65 @@ export const RoleAuthGateModal: React.FC<RoleAuthGateModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-xs font-mono font-bold text-[#D8CFB4] uppercase tracking-wider mb-2 flex items-center justify-between">
-                <span>{selectedTeam.name} Confidential PIN:</span>
-                <span className="text-[10px] font-normal text-gray-400">Default: {selectedTeam.pin || `TEAM${selectedTeam.paddleNumber}`}</span>
+              <label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center justify-between">
+                <span>{selectedTeam?.name} Security PIN:</span>
+                <button
+                  type="button"
+                  onClick={() => setTeamPinInput(selectedTeam?.pin || `TEAM${selectedTeam?.paddleNumber}`)}
+                  className="text-[#16A085] text-[11px] font-mono hover:underline"
+                >
+                  Auto-Fill ({selectedTeam?.pin || `TEAM${selectedTeam?.paddleNumber}`})
+                </button>
               </label>
               <div className="relative">
                 <input
                   type={showPin ? 'text' : 'password'}
                   value={teamPinInput}
                   onChange={(e) => setTeamPinInput(e.target.value)}
-                  placeholder={`e.g. ${selectedTeam.pin || 'TITAN101'}`}
-                  className="w-full px-4 py-3 rounded-[18px] bg-white/[0.03] border-none text-white font-mono placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#16A085] text-sm tracking-widest"
+                  placeholder={`e.g. ${selectedTeam?.pin || 'TITAN101'}`}
+                  className="w-full theme-input font-mono text-sm tracking-widest"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPin(!showPin)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
                 >
                   {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-              <div className="flex items-center justify-between mt-1.5 text-[11px] text-gray-400">
-                <span>Locks terminal strictly to Paddle #{selectedTeam.paddleNumber}</span>
-                <button
-                  type="button"
-                  onClick={() => setTeamPinInput(selectedTeam.pin || `TEAM${selectedTeam.paddleNumber}`)}
-                  className="text-[#16A085] hover:underline"
-                >
-                  Auto-Fill
                 </button>
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full py-3.5 rounded-[18px] bg-[#16A085] hover:bg-[#1abc9c] text-black font-black uppercase text-sm tracking-wider shadow-lg shadow-[#16A085]/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-[18px] theme-btn-primary text-black font-bold uppercase text-sm tracking-wider flex items-center justify-center gap-2"
             >
               <Users className="w-4 h-4" />
-              <span>Lock Terminal to {selectedTeam.shortCode} (#{selectedTeam.paddleNumber})</span>
+              <span>Unlock Franchise Cockpit</span>
             </button>
           </form>
         )}
 
-        {/* TAB 3: SPECTATOR VIEWER */}
+        {/* TAB 3: SPECTATOR */}
         {activeTab === 'VIEWER' && (
           <div className="mt-5 space-y-4">
-            <div className="p-4 rounded-[18px] bg-white/[0.03] border border-[#16A085]/30 text-xs text-[#D8CFB4] leading-relaxed">
-              <div className="font-bold flex items-center gap-1.5 text-[#16A085] mb-1">
+            <div className="p-4 rounded-[18px] bg-white/[0.03] border border-white/[0.08] text-xs text-slate-300 leading-relaxed space-y-2">
+              <div className="font-bold flex items-center gap-1.5 text-[#16A085]">
                 <Tv className="w-4 h-4" />
-                Public 4K Stadium Projector Feed
+                4K Stadium Projector Feed
               </div>
-              Free read-only access designed for arena projectors, broadcast video walls, and online spectators. Bidding controls and gavel actions are completely disabled in this mode.
+              <p>
+                Public broadcast display mode with zero bidding buttons and zero administrative controls.
+                Ideal for stadium projectors, auditorium displays, and live tournament streams.
+              </p>
             </div>
 
             <button
               type="button"
               onClick={handleSpectatorSelect}
-              className="w-full py-3.5 rounded-[18px] bg-[#16A085] hover:bg-[#1abc9c] text-black font-black uppercase text-sm tracking-wider shadow-lg shadow-[#16A085]/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-[18px] theme-btn-primary text-black font-bold uppercase text-sm tracking-wider flex items-center justify-center gap-2"
             >
               <Tv className="w-4 h-4" />
-              <span>Launch Spectator Broadcast (Read-Only)</span>
+              <span>Launch Stadium View</span>
             </button>
           </div>
         )}
@@ -357,3 +352,5 @@ export const RoleAuthGateModal: React.FC<RoleAuthGateModalProps> = ({
     </div>
   );
 };
+
+export default RoleAuthGateModal;
